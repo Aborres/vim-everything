@@ -1,20 +1,20 @@
 "public
-let g:ve_list_size = 20
-let g:ve_resize = 1
+let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
+let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
 
 " use PopupNotification to change BG color
 " use PopupSelected to change cursor color
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
-let g:ve_explore  = 'Explore '
-let g:ve_vexplore = 'Vexplore '
-let g:ve_hexplore = 'Hexplore '
-let g:ve_texplore = 'Texplore '
+let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
+let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
+let g:ve_hexplore = 'Hexplore ' "Default action when pressing S on a folder
+let g:ve_texplore = 'Texplore ' "Default action when pressing T on a folder
 
-let g:ve_edit  = 'edit '
-let g:ve_vedit = 'vsplit '
-let g:ve_hedit = 'split '
-let g:ve_tedit = 'tabe '
+let g:ve_edit  = 'edit '   "Default action when pressing Enter on a file
+let g:ve_vedit = 'vsplit ' "Default action when pressing V on a file
+let g:ve_hedit = 'split '  "Default action when pressing S on a file
+let g:ve_tedit = 'tabe '   "Default action when pressing T on a file
 
 "private
 let s:ve_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')

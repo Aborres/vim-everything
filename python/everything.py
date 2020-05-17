@@ -63,6 +63,7 @@ class Everything:
     self.result     = []
     self.file_names = []
     self.file_paths = []
+    self.file_types = []
 
     self.dll_name = "Everything32.dll"
     if (sys.maxsize > 2**32):
