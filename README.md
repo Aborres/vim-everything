@@ -21,6 +21,8 @@ VE accepts the same regex syntax Everything accepts.
 For example: *.vim \vim\ would list all the .vim files under the \vim\ hierarchy.
 
 Use the arrow keys to move and edit the text.
+Up/Down To jump to the front/end of the text.
+~ will clear the search.
 
 #### Results:
 VE uses default hjkl vim navigation (or arrow keys) when moving through files.
@@ -28,6 +30,8 @@ VE uses default hjkl vim navigation (or arrow keys) when moving through files.
 Use j/k and to move up/down between the results.
 
 Use h/l to jump result pages.
+
+Use g/G to jump to the first/last element of the results.
 
 ## Usage
 

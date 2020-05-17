@@ -43,7 +43,7 @@ let s:footer_text = []
 let g:ve_current_buff = []
 let s:ve_current_mode = s:ve_input_mode
 
-let s:ve_search_txt   = ""
+let s:ve_search_txt   = s:ve_cursor
 
 func VE_Reset()
 
@@ -95,7 +95,7 @@ func VE_UpdateFooter(id)
   let s:footer_text = []
   call add(s:footer_text, " ")
   call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
-  call add(s:footer_text, "Num res: " . g:ve_total_r . " | Idx: " . a:id . " | Pag: " . s:ve_curr_pag . "/" . VE_TotalPages())
+  call add(s:footer_text, "Num res: " . g:ve_total_r . " | Idx: " . a:id . " | Pag: " . s:ve_curr_pag . "/" . (VE_TotalPages() + 1))
   return s:footer_text
 endfunction
 
@@ -209,6 +209,15 @@ func VE_JumpPage(id, dir)
     let s:ve_curr_pag = total
   endif
   call VE_SearchW(s:ve_search_txt, s:ve_curr_pag * g:ve_list_size)
+
+  let next_pos = s:ve_screen_space_idx
+  if (s:ve_screen_space_idx < VE_FirstItemIdx())
+    let next_pos = VE_FirstItemIdx()
+  elseif (s:ve_screen_space_idx > VE_LastItemIdx())
+    let next_pos = VE_LastItemIdx()
+  endif
+
+  call VE_JumpToElement(a:id, next_pos)
   call VE_UpdateScreenBody(a:id)
 
   return 1
@@ -220,10 +229,8 @@ func VE_UpdateDown(id)
   call popup_filter_menu(a:id, 'j')
 
   if (s:ve_screen_space_idx > VE_LastItemIdx())
-
     call VE_JumpToFirstElement(a:id)
-    call VE_JumpPage(a:id, -1)
-
+    call VE_JumpPage(a:id, 1)
   else
     call VE_UpdateScreenFooter(a:id, VE_ToList(s:ve_screen_space_idx))
   endif
@@ -237,10 +244,8 @@ func VE_UpdateUp(id)
   call popup_filter_menu(a:id, 'k')
 
   if (s:ve_screen_space_idx < VE_FirstItemIdx())
-
     call VE_JumpToLastElement(a:id)
     call VE_JumpPage(a:id, -1)
-
   else
     call VE_UpdateScreenFooter(a:id, VE_ToList(s:ve_screen_space_idx))
   endif
@@ -259,37 +264,21 @@ func VE_FilterInputMode(id, key)
 
   if (a:key == "\<Up>" || a:key == "\<Home>")
 
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0)
+    if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[0] == s:ve_cursor))
       return 1
     endif
 
-    let c_left  = split_s[0]
-    let c_right = ""
-    if (l > 1)
-      let c_right = split_s[1]
-    endif
-
-    let s:ve_search_txt = s:ve_cursor . c_left . c_right
+    let s:ve_search_txt = s:ve_cursor . substitute(s:ve_search_txt, s:ve_cursor, '', '')
     return VE_UpdateInputText(a:id)
   endif
 
   if (a:key == "\<Down>" || a:key == "\<End>")
 
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0)
+    if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[strlen(s:ve_search_txt) - 1] == s:ve_cursor))
       return 1
     endif
 
-    let c_left  = split_s[0]
-    let c_right = ""
-    if (l > 1)
-      let c_right = split_s[1]
-    endif
-
-    let s:ve_search_txt = c_left . c_right . s:ve_cursor
+    let s:ve_search_txt = substitute(s:ve_search_txt, s:ve_cursor, '', '') . s:ve_cursor
     return VE_UpdateInputText(a:id)
   endif
 
@@ -359,7 +348,18 @@ func VE_FilterInputMode(id, key)
     return VE_UpdateInputText(a:id)
   endif
 
+  if (a:key == '~')
+    let s:ve_search_txt = s:ve_cursor
+    return VE_UpdateInputText(a:id)
+  endif
+
   if (a:key == "\<Del>")
+
+    if (s:ve_search_txt[0] == s:ve_cursor)
+      let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[2:]
+      return VE_UpdateInputText(a:id)
+    endif
+
     let split_s = split(s:ve_search_txt, s:ve_cursor)
     let l = len(split_s)
     if (l == 0)
@@ -397,13 +397,17 @@ func VE_FilterInputMode(id, key)
     endif 
 
     let c_left  = split_s[0]
+    if (s:ve_search_txt[0] == s:ve_cursor)
+      let s:ve_search_txt = a:key . s:ve_cursor . c_left
+      return VE_UpdateInputText(a:id)
+    endif
+
     let c_right = ""
     if (l > 1)
       let c_right = split_s[1]
     endif
 
     let s:ve_search_txt = c_left . a:key . s:ve_cursor . c_right
-
     return VE_UpdateInputText(a:id)
   endif
 
@@ -454,12 +458,20 @@ func VE_FilterNavMode(id, key)
     return VE_JumpPage(a:id, 1)
   endif
 
+  if (a:key == 'g')
+    call VE_JumpToFirstElement(a:id)
+    return VE_UpdateInputText(a:id)
+  endif
+
+  if (a:key == 'G')
+    call VE_JumpToLastElement(a:id)
+    return VE_UpdateInputText(a:id)
+  endif
+
   return popup_filter_menu(a:id, a:key)
 endfunction
 
 func VE_Filter(id, key)
-
-  hi PmenuSel ctermfg=red
 
   if (s:ve_current_mode == s:ve_input_mode)
     return VE_FilterInputMode(a:id, a:key)
@@ -515,7 +527,6 @@ func VE_Callback(id, result)
 endfunction
 
 function VE()
-
   call VE_Reset()
   call VE_SearchW(s:ve_search_txt, 0)
   call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), 
