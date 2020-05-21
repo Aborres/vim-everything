@@ -6,6 +6,8 @@ let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the m
 " use PopupSelected to change cursor color
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
+let g:ve_clear_c  = '~' "Key used to clear input search
+let g:ve_fixed_w  = 128 "if set to any value, the window will have that size
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
 let g:ve_hexplore = 'Hexplore ' "Default action when pressing S on a folder
@@ -341,7 +343,7 @@ func VE_FilterInputMode(id, key)
     return VE_UpdateInputText(a:id)
   endif
 
-  if (a:key == '~')
+  if (a:key == g:ve_clear_c)
     let s:ve_search_txt = s:ve_cursor
     return VE_UpdateInputText(a:id)
   endif
@@ -522,8 +524,9 @@ endfunction
 function VE()
   call VE_Reset()
   call VE_SearchW(s:ve_search_txt, 0)
-  call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), 
-        \#{title:'vim-Everything',
+
+  let ve_args = #{
+          \ title:'vim-Everything',
           \ filter: 'VE_Filter',
           \ callback: 'VE_Callback',
           \ resize: 'g:ve_resize',
@@ -531,5 +534,12 @@ function VE()
           \ wrap: 0,
           \ scrollbar: 1,
           \ close: 'click'
-        \})
+        \}
+
+  if (g:ve_fixed_w)
+    let ve_args.minwidth = g:ve_fixed_w
+    let ve_args.maxwidth = g:ve_fixed_w
+  endif
+
+  call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), ve_args)
 endfunction
