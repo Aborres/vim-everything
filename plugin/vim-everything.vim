@@ -148,24 +148,19 @@ EOF
 endfunction
 
 func VE_JumpToElement(id, e)
-
-  let f_ir = a:e
-  let dif = f_ir - s:ve_screen_space_idx
-  let key = 'j'
-  if (s:ve_screen_space_idx > f_ir)
-    let key = 'k'
-    let dif = s:ve_screen_space_idx - f_ir 
-  endif
-
-  let i = 0
-  while (i < dif)
-    call popup_filter_menu(a:id, key)
-    let i+=1
-  endwhile
-
   let s:ve_screen_space_idx = a:e
+  echo s:ve_screen_space_idx
+  call win_execute(a:id, ":". (s:ve_screen_space_idx + 1))
   
   return 1
+endfunction
+
+func VE_JumpToNextLine(id)
+  call VE_JumpToElement(a:id, s:ve_screen_space_idx + 1)
+endfunction
+
+func VE_JumpToPrevLine(id)
+  call VE_JumpToElement(a:id, s:ve_screen_space_idx - 1)
 endfunction
 
 func VE_JumpToFirstElement(id)
@@ -225,8 +220,7 @@ endfunction
 
 func VE_UpdateDown(id)
 
-  let s:ve_screen_space_idx += 1
-  call popup_filter_menu(a:id, 'j')
+  call VE_JumpToNextLine(a:id)
 
   if (s:ve_screen_space_idx > VE_LastItemIdx())
     call VE_JumpToFirstElement(a:id)
@@ -239,9 +233,8 @@ func VE_UpdateDown(id)
 endfunction
 
 func VE_UpdateUp(id)
-  
-  let s:ve_screen_space_idx -= 1
-  call popup_filter_menu(a:id, 'k')
+
+  call VE_JumpToPrevLine(a:id)
 
   if (s:ve_screen_space_idx < VE_FirstItemIdx())
     call VE_JumpToLastElement(a:id)
