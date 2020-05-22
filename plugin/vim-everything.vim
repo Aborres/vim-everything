@@ -126,8 +126,9 @@ endfunction
 
 func VE_SearchW(text, from)
 
-let s:ve_search_txt = a:text
-let s:ve_offset_txt = a:from 
+  let s:ve_search_txt = a:text
+  let s:ve_offset_txt = a:from 
+  let s:ve_status = 1
 
 python << EOF
 import sys
@@ -144,9 +145,12 @@ text = str(vim.eval('s:ve_search_txt'))
 f = int(vim.eval('s:ve_offset_txt'))
 max = int(vim.eval('g:ve_list_size'))
 
-VE_Search(text, f, max)
+vim.command('let s:ve_status=%s'%VE_Search(text, f, max))
 
 EOF
+
+  return s:ve_status
+
 endfunction
 
 func VE_JumpToElement(id, e)
@@ -522,8 +526,12 @@ func VE_Callback(id, result)
 endfunction
 
 function VE()
+
   call VE_Reset()
-  call VE_SearchW(s:ve_search_txt, 0)
+
+  if (!VE_SearchW(s:ve_search_txt, 0))
+    return 0
+  endif
 
   let ve_args = #{
           \ title:'vim-Everything',
