@@ -1,6 +1,12 @@
 "public
 let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
 let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
+let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
+
+" VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
+" VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
+" VE_SearchInPath(path)    "Opens VE in the specified path
+" VE_Search(txt)           "Searches specified text
 
 " use PopupNotification to change BG color
 " use PopupSelected to change cursor color
@@ -149,7 +155,6 @@ endfunction
 
 func VE_JumpToElement(id, e)
   let s:ve_screen_space_idx = a:e
-  echo s:ve_screen_space_idx
   call win_execute(a:id, ":". (s:ve_screen_space_idx + 1))
   
   return 1
@@ -164,7 +169,6 @@ func VE_JumpToPrevLine(id)
 endfunction
 
 func VE_JumpToFirstElement(id)
-
   if (s:ve_screen_space_idx == VE_FirstItemIdx())
     return 1
   endif
@@ -253,6 +257,10 @@ func VE_UpdateInputText(id)
   return 1
 endfunction
 
+func VE_RemoveCursor(txt)
+  return substitute(a:txt, s:ve_cursor, '', '')
+endfunction
+
 func VE_FilterInputMode(id, key)
 
   if (a:key == "\<Up>" || a:key == "\<Home>")
@@ -261,7 +269,7 @@ func VE_FilterInputMode(id, key)
       return 1
     endif
 
-    let s:ve_search_txt = s:ve_cursor . substitute(s:ve_search_txt, s:ve_cursor, '', '')
+    let s:ve_search_txt = s:ve_cursor . VE_RemoveCursor(s:ve_search_txt)
     return VE_UpdateInputText(a:id)
   endif
 
@@ -271,7 +279,7 @@ func VE_FilterInputMode(id, key)
       return 1
     endif
 
-    let s:ve_search_txt = substitute(s:ve_search_txt, s:ve_cursor, '', '') . s:ve_cursor
+    let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt) . s:ve_cursor
     return VE_UpdateInputText(a:id)
   endif
 
@@ -485,8 +493,6 @@ func VE_Callback(id, result)
   let r = a:result[0]
   let m = a:result[1]
 
-  echo g:ve_r_types[r]
-
   if (r > -1)
     if (m == s:ve_open_enter)
       if (g:ve_r_types[r])
@@ -519,9 +525,21 @@ func VE_Callback(id, result)
   return 1
 endfunction
 
-function VE()
+function VE(keep_prev_search = 1)
+
+  if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
+    let s:ve_search_txt = ""
+  endif
+
+  call VE_Search(s:ve_search_txt)
+
+endfunction
+
+function VE_Search(txt)
+
   call VE_Reset()
-  call VE_SearchW(s:ve_search_txt, 0)
+  let search_text = s:ve_cursor . " " . trim(VE_RemoveCursor(a:txt))
+  call VE_SearchW(search_text, 0)
   call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), 
         \#{title:'vim-Everything',
           \ filter: 'VE_Filter',
@@ -532,4 +550,25 @@ function VE()
           \ scrollbar: 1,
           \ close: 'click'
         \})
+endfunction
+
+function VE_SearchInPath(path)
+
+  let txt = a:path
+
+  let pos = stridx(txt, '/')
+  if (pos == -1)
+    let pos = stridx(txt, '\')
+  endif
+
+  if (pos > 0)
+    let txt = txt[pos:]
+  endif
+  
+  call VE_Search(txt)
+
+endfunction
+
+funct VE_Path()
+  call VE_SearchInPath(s:ve_search_txt)
 endfunction
