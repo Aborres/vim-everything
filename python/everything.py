@@ -78,7 +78,7 @@ class Everything:
     self.reset()
 
     if (not self.api.Everything_IsDBLoaded()):
-      print("VE: Failed to load DB")
+      print("VE: Failed to load DB, Is Everything running?")
       return
 
     flags = 3
@@ -94,6 +94,7 @@ class Everything:
     if (not self.api.Everything_QueryW(True)):
       print("VE: Failed when trying to Query")
       self.printEverythingError()
+      return False
 
     self.total_results = self.api.Everything_GetTotFileResults()
     self.num_results   = self.api.Everything_GetNumResults()
@@ -123,6 +124,8 @@ class Everything:
       self.file_names.append(name)
       self.file_paths.append(path)
       self.result.append((name, path))
+
+    return True
 
   def reset(self):
     self.api.Everything_CleanUp()

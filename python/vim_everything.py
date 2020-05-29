@@ -37,8 +37,10 @@ def VE_Search(text, f, buff_size):
     text = text.decode('unicode-escape')
 
   e = Everything()
-  e.search(text, f, buff_size)
+  if (not e.search(text, f, buff_size)):
+    return 0
 
   vim.command("let g:ve_total_r=%s"%e.total_results)
   vim.command("let g:ve_num_r=%s"%e.num_results)
   __UpdateVimBuffers(e.file_names, e.file_paths, e.file_types)
+  return 1
