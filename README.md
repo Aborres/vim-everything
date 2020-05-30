@@ -62,11 +62,21 @@ These options are customizable:
 ```vim
 let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
 let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
+let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
+
+" VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
+" VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
+" VE_SearchInPath(path)    "Opens VE in the specified path
+" VE_Search(txt)           "Searches specified text
 
 " use PopupNotification to change BG color
 " use PopupSelected to change cursor color
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
+let g:ve_clear_c  = '~' "Key used to clear input search
+let g:ve_clear_name = '!'
+let g:ve_clear_path = '@'
+let g:ve_fixed_w  = 128 "if set to any value, the window will have that size
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
 let g:ve_hexplore = 'Hexplore ' "Default action when pressing S on a folder
