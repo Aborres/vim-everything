@@ -12,10 +12,12 @@ let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searc
 " use PopupSelected to change cursor color
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
-let g:ve_clear_c  = '~' "Key used to clear input search
-let g:ve_clear_name = '!'
-let g:ve_clear_path = '@'
-let g:ve_fixed_w  = 128 "if set to any value, the window will have that size
+let g:ve_clear_c    = '~' "Key used to clear input search
+let g:ve_clear_name = '!' "Key used to clear name from the input search
+let g:ve_clear_path = '@' "Key used to clear path from the input search
+
+let g:ve_fixed_w = 128 "if set to any value, the window will have that size
+
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
 let g:ve_hexplore = 'Hexplore ' "Default action when pressing S on a folder
