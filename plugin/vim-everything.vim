@@ -13,8 +13,8 @@ let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searc
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
 let g:ve_clear_c  = '~' "Key used to clear input search
-let g:ve_clear_name = '@'
-let g:ve_clear_path = '!'
+let g:ve_clear_name = '!'
+let g:ve_clear_path = '@'
 let g:ve_fixed_w  = 128 "if set to any value, the window will have that size
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
@@ -419,7 +419,8 @@ func VE_FilterClearName(id, key)
 
   let pos = VE_FilterSplitNamePath(s:ve_search_txt)
   if (pos > 0) 
-    let s:ve_search_txt = s:ve_search_txt[pos:]
+    let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
+    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[pos:]
     return VE_UpdateInputText(a:id)
   endif
   return 1
@@ -429,7 +430,8 @@ func VE_FilterClearPath(id, key)
 
   let pos = VE_FilterSplitNamePath(s:ve_search_txt)
   if (pos > 0) 
-    let s:ve_search_txt = s:ve_search_txt[:pos - 1]
+    let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
+    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[:pos - 1]
     return VE_UpdateInputText(a:id)
   endif
   return 1
