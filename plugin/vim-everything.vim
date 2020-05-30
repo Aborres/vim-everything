@@ -7,6 +7,8 @@ let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the m
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
 let g:ve_clear_c  = '~' "Key used to clear input search
+let g:ve_clear_name = '@'
+let g:ve_clear_path = '!'
 let g:ve_fixed_w  = 128 "if set to any value, the window will have that size
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
@@ -64,19 +66,19 @@ func VE_Reset()
   let s:ve_screen_space_idx = 0
   let s:ve_curr_pag         = 0
 
-endfunction
+endfunc
 
 func VE_FirstItemIdx()
   return s:ve_top_offset
-endfunction
+endfunc
 
 func VE_LastItemIdx()
   return g:ve_num_r + s:ve_top_offset - 1
-endfunction
+endfunc
 
 func VE_TotalPages()
   return g:ve_total_r / g:ve_list_size
-endfunction
+endfunc
 
 "These functions update the text in the buffers
 func VE_UpdateScreenText()
@@ -84,14 +86,14 @@ func VE_UpdateScreenText()
   let out += g:ve_current_buff
   let out += s:footer_text
   return out
-endfunction
+endfunc
 
 func VE_UpdateHeader(text)
   let s:header_text = []
   call add(s:header_text, "VE: " . a:text)
   call add(s:header_text, "")
   return s:header_text
-endfunction
+endfunc
 
 func VE_UpdateFooter(id)
   let s:footer_text = []
@@ -99,7 +101,7 @@ func VE_UpdateFooter(id)
   call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
   call add(s:footer_text, "Num res: " . g:ve_total_r . " | Idx: " . a:id . " | Pag: " . s:ve_curr_pag . "/" . (VE_TotalPages() + 1))
   return s:footer_text
-endfunction
+endfunc
 
 func VE_FormScreenText(header, footer)
   let out = []
@@ -107,21 +109,21 @@ func VE_FormScreenText(header, footer)
   let out += g:ve_current_buff
   let out += VE_UpdateFooter(a:footer)
   return out
-endfunction
+endfunc
 "
 
 "These functions update the screen directly
 func VE_UpdateScreen(id, header, footer)
   call popup_settext(a:id, VE_FormScreenText(a:header, a:footer))
-endfunction
+endfunc
 
 func VE_UpdateScreenBody(id)
   call popup_settext(a:id, VE_FormScreenText(s:ve_search_txt, VE_ToList(s:ve_screen_space_idx)))
-endfunction
+endfunc
 
 func VE_UpdateScreenFooter(id, txt)
   call popup_settext(a:id, VE_FormScreenText(s:ve_search_txt, a:txt))
-endfunction
+endfunc
 "
 
 func VE_SearchW(text, from)
@@ -151,7 +153,7 @@ EOF
 
   return s:ve_status
 
-endfunction
+endfunc
 
 func VE_JumpToElement(id, e)
   let s:ve_screen_space_idx = a:e
@@ -159,15 +161,15 @@ func VE_JumpToElement(id, e)
   call win_execute(a:id, ":". (s:ve_screen_space_idx + 1))
   
   return 1
-endfunction
+endfunc
 
 func VE_JumpToNextLine(id)
   call VE_JumpToElement(a:id, s:ve_screen_space_idx + 1)
-endfunction
+endfunc
 
 func VE_JumpToPrevLine(id)
   call VE_JumpToElement(a:id, s:ve_screen_space_idx - 1)
-endfunction
+endfunc
 
 func VE_JumpToFirstElement(id)
 
@@ -176,7 +178,7 @@ func VE_JumpToFirstElement(id)
   endif
 
   return VE_JumpToElement(a:id, VE_FirstItemIdx())
-endfunction
+endfunc
 
 func VE_JumpToLastElement(id)
 
@@ -185,11 +187,11 @@ func VE_JumpToLastElement(id)
   endif
 
   return VE_JumpToElement(a:id, VE_LastItemIdx())
-endfunction
+endfunc
 
 func VE_JumpToInput(id)
   return VE_JumpToElement(a:id, 0)
-endfunction
+endfunc
 
 func VE_ToList(id)
   let out = a:id - s:ve_top_offset
@@ -197,7 +199,7 @@ func VE_ToList(id)
     let out = 0
   endif
   return out
-endfunction
+endfunc
 
 func VE_JumpPage(id, dir)
 
@@ -222,7 +224,7 @@ func VE_JumpPage(id, dir)
   call VE_UpdateScreenBody(a:id)
 
   return 1
-endfunction
+endfunc
 
 func VE_UpdateDown(id)
 
@@ -236,7 +238,7 @@ func VE_UpdateDown(id)
   endif
 
   return 1
-endfunction
+endfunc
 
 func VE_UpdateUp(id)
 
@@ -250,101 +252,184 @@ func VE_UpdateUp(id)
   endif
 
   return 1
-endfunction
+endfunc
 
 func VE_UpdateInputText(id)
   let s:ve_curr_pag         = 0
   call VE_SearchW(s:ve_search_txt, 0)
   call VE_UpdateScreenBody(a:id)
   return 1
-endfunction
+endfunc
+
+func VE_FilterUp(id, key)
+  if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[0] == s:ve_cursor))
+    return 1
+  endif
+
+  let s:ve_search_txt = s:ve_cursor . substitute(s:ve_search_txt, s:ve_cursor, '', '')
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterDown(id, key)
+  if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[strlen(s:ve_search_txt) - 1] == s:ve_cursor))
+    return 1
+  endif
+
+  let s:ve_search_txt = substitute(s:ve_search_txt, s:ve_cursor, '', '') . s:ve_cursor
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterRight(id, key)
+  let split_s = split(s:ve_search_txt, s:ve_cursor)
+  let l = len(split_s)
+  if (l == 0 || s:ve_search_txt[strlen(s:ve_search_txt) - 1] == s:ve_cursor)
+    return 1
+  endif
+
+  if (s:ve_search_txt[0] == s:ve_cursor)
+    let s:ve_search_txt = s:ve_search_txt[1] . s:ve_cursor . s:ve_search_txt[2:]
+    return VE_UpdateInputText(a:id)
+  endif
+
+  let c_left  = split_s[0]
+  let c_right = ""
+  let last_char = "" 
+
+  if (l > 1)
+    let c_right = split_s[1]
+    let last_char = c_right[0]
+    let c_right = c_right[1:]
+  endif
+
+  let s:ve_search_txt = c_left . last_char . s:ve_cursor . c_right
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterLeft(id, key)
+  let split_s = split(s:ve_search_txt, s:ve_cursor)
+  let l = len(split_s)
+  if (l == 0 || s:ve_search_txt[0] == s:ve_cursor)
+    return 1
+  endif
+
+  let c_left  = split_s[0]
+  let c_right = ""
+  if (l > 1)
+    let c_right = split_s[1]
+  endif
+
+  let last_char = c_left[len(c_left) - 1]
+  let c_left = c_left[:-2]
+
+  let s:ve_search_txt = c_left . s:ve_cursor . last_char  . c_right
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterBS(id, key)
+  let l = len(s:ve_search_txt)
+
+  if (l < 2)
+    return 1
+  endif
+  
+  if (s:ve_search_txt[0] == s:ve_cursor)
+    return 1
+  endif
+
+  if (s:ve_search_txt[l - 1] == s:ve_cursor)
+    let s:ve_search_txt = s:ve_search_txt[:-3] . s:ve_cursor 
+    echo s:ve_search_txt
+    return VE_UpdateInputText(a:id)
+  endif 
+
+  let split_s = split(s:ve_search_txt, s:ve_cursor)
+  let prev_cursor = split_s[0][:-2]
+  let aftr_cursor = split_s[1]
+
+  let s:ve_search_txt = prev_cursor . s:ve_cursor . aftr_cursor
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterDel(id, key)
+  let l = len(s:ve_search_txt)
+
+  if (l < 2)
+    return 1
+  endif
+
+  if (s:ve_search_txt[l - 1] == s:ve_cursor)
+    return 1
+  endif 
+
+  if (s:ve_search_txt[0] == s:ve_cursor)
+    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[2:]
+    return VE_UpdateInputText(a:id)
+  endif
+
+  let split_s = split(s:ve_search_txt, s:ve_cursor)
+  let prev_cursor = split_s[0]
+  let aftr_cursor = split_s[1][1:]
+
+  let s:ve_search_txt = prev_cursor . s:ve_cursor . aftr_cursor
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterInput(id, key)
+  let split_s = split(s:ve_search_txt, s:ve_cursor)
+  let l = len(split_s)
+  if (l == 0)
+    let s:ve_search_txt = a:key . s:ve_cursor
+    return VE_UpdateInputText(a:id)
+  endif 
+
+  let c_left  = split_s[0]
+  if (s:ve_search_txt[0] == s:ve_cursor)
+    let s:ve_search_txt = a:key . s:ve_cursor . c_left
+    return VE_UpdateInputText(a:id)
+  endif
+
+  let c_right = ""
+  if (l > 1)
+    let c_right = split_s[1]
+  endif
+
+  let s:ve_search_txt = c_left . a:key . s:ve_cursor . c_right
+  return VE_UpdateInputText(a:id)
+endfunc
+
+func VE_FilterSplitNamePath(text)
+  let split_s = split(a:text, '\')
+  if (len(split_s) < 0)
+    let split_s = split(a:text, '/')
+  endif
+endfunc
+
+func VE_FilterClearName(id, key)
+endfunc
+
+func VE_FilterClearPath(id, key)
+endfunc
 
 func VE_FilterInputMode(id, key)
 
   if (a:key == "\<Up>" || a:key == "\<Home>")
-
-    if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[0] == s:ve_cursor))
-      return 1
-    endif
-
-    let s:ve_search_txt = s:ve_cursor . substitute(s:ve_search_txt, s:ve_cursor, '', '')
-    return VE_UpdateInputText(a:id)
+    return VE_FilterUp(a:id, a:key)
   endif
 
   if (a:key == "\<Down>" || a:key == "\<End>")
-
-    if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[strlen(s:ve_search_txt) - 1] == s:ve_cursor))
-      return 1
-    endif
-
-    let s:ve_search_txt = substitute(s:ve_search_txt, s:ve_cursor, '', '') . s:ve_cursor
-    return VE_UpdateInputText(a:id)
+    return VE_FilterDown(a:id, a:key)
   endif
 
   if (a:key == "\<Right>")
-
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0 || s:ve_search_txt[strlen(s:ve_search_txt) - 1] == s:ve_cursor)
-      return 1
-    endif
-
-    if (s:ve_search_txt[0] == s:ve_cursor)
-      let s:ve_search_txt = s:ve_search_txt[1] . s:ve_cursor . s:ve_search_txt[2:]
-      return VE_UpdateInputText(a:id)
-    endif
-
-    let c_left  = split_s[0]
-    let c_right = ""
-    let last_char = "" 
-
-    if (l > 1)
-      let c_right = split_s[1]
-      let last_char = c_right[0]
-      let c_right = c_right[1:]
-    endif
-
-    let s:ve_search_txt = c_left . last_char . s:ve_cursor . c_right
-    return VE_UpdateInputText(a:id)
+    return VE_FilterRight(a:id, a:key)
   endif
 
   if (a:key == "\<Left>")
-
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0 || s:ve_search_txt[0] == s:ve_cursor)
-      return 1
-    endif
-
-    let c_left  = split_s[0]
-    let c_right = ""
-    if (l > 1)
-      let c_right = split_s[1]
-    endif
-
-    let last_char = c_left[len(c_left) - 1]
-    let c_left = c_left[:-2]
-
-    let s:ve_search_txt = c_left . s:ve_cursor . last_char  . c_right
-    return VE_UpdateInputText(a:id)
+    return VE_FilterLeft(a:id, a:key)
   endif
 
   if (a:key == "\<BS>")
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0)
-      return 1
-    endif
-
-    let prev_cursor = split_s[0][:-2]
-    let aftr_cursor = ""
-
-    if (l > 1)
-      let aftr_cursor = split_s[1]
-    endif
-
-    let s:ve_search_txt = prev_cursor . s:ve_cursor . aftr_cursor
-    return VE_UpdateInputText(a:id)
+    return VE_FilterBS(a:id, a:key)
   endif
 
   if (a:key == g:ve_clear_c)
@@ -352,28 +437,16 @@ func VE_FilterInputMode(id, key)
     return VE_UpdateInputText(a:id)
   endif
 
+  if (a:key == g:ve_clear_name)
+    return VE_FilterClearName(a:id, a:key)
+  endif
+
+  if (a:key == g:ve_clear_path)
+    return VE_FilterClearPath(a:id, a:key)
+  endif
+
   if (a:key == "\<Del>")
-
-    if (s:ve_search_txt[0] == s:ve_cursor)
-      let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[2:]
-      return VE_UpdateInputText(a:id)
-    endif
-
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0)
-      return 1
-    endif
-
-    let prev_cursor = split_s[0]
-    let aftr_cursor = ""
-
-    if (l > 1)
-      let aftr_cursor = split_s[1][1:]
-    endif
-
-    let s:ve_search_txt = prev_cursor . s:ve_cursor . aftr_cursor
-    return VE_UpdateInputText(a:id)
+    return VE_FilterDel(a:id, a:key)
   endif
 
   if (a:key == "\<CR>") "Enter
@@ -387,36 +460,16 @@ func VE_FilterInputMode(id, key)
   endif
 
   if (a:key >= ' ' && a:key <= '~')
-
-    let split_s = split(s:ve_search_txt, s:ve_cursor)
-    let l = len(split_s)
-    if (l == 0)
-      let s:ve_search_txt = a:key . s:ve_cursor
-      return VE_UpdateInputText(a:id)
-    endif 
-
-    let c_left  = split_s[0]
-    if (s:ve_search_txt[0] == s:ve_cursor)
-      let s:ve_search_txt = a:key . s:ve_cursor . c_left
-      return VE_UpdateInputText(a:id)
-    endif
-
-    let c_right = ""
-    if (l > 1)
-      let c_right = split_s[1]
-    endif
-
-    let s:ve_search_txt = c_left . a:key . s:ve_cursor . c_right
-    return VE_UpdateInputText(a:id)
+    return VE_FilterInput(a:id, a:key)
   endif
 
   return popup_filter_menu(a:id, a:key)
-endfunction
+endfunc
 
 func VE_CloseWith(id, mode)
   call popup_close(a:id, [s:ve_screen_space_idx - s:ve_top_offset, a:mode])
   return 1
-endfunction
+endfunc
 
 func VE_FilterNavMode(id, key)
 
@@ -468,7 +521,7 @@ func VE_FilterNavMode(id, key)
   endif
 
   return popup_filter_menu(a:id, a:key)
-endfunction
+endfunc
 
 func VE_Filter(id, key)
 
@@ -480,11 +533,11 @@ func VE_Filter(id, key)
     echo "VE: Undefined filter mode"
   endif
 
-endfunction
+endfunc
 
 func VE_OpenFile(r)
   return g:ve_r_paths[a:r] . "/" . g:ve_r_names[a:r]
-endfunction
+endfunc
 
 func VE_Callback(id, result)
 
@@ -523,7 +576,7 @@ func VE_Callback(id, result)
     endif
   endif
   return 1
-endfunction
+endfunc
 
 function VE()
 
@@ -550,4 +603,4 @@ function VE()
   endif
 
   call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), ve_args)
-endfunction
+endfunc
