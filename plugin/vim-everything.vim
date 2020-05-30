@@ -1,6 +1,12 @@
 "public
 let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
 let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
+let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
+
+" VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
+" VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
+" VE_SearchInPath(path)    "Opens VE in the specified path
+" VE_Search(txt)           "Searches specified text
 
 " use PopupNotification to change BG color
 " use PopupSelected to change cursor color
@@ -157,7 +163,6 @@ endfunc
 
 func VE_JumpToElement(id, e)
   let s:ve_screen_space_idx = a:e
-  echo s:ve_screen_space_idx
   call win_execute(a:id, ":". (s:ve_screen_space_idx + 1))
   
   return 1
@@ -172,7 +177,6 @@ func VE_JumpToPrevLine(id)
 endfunc
 
 func VE_JumpToFirstElement(id)
-
   if (s:ve_screen_space_idx == VE_FirstItemIdx())
     return 1
   endif
@@ -199,6 +203,10 @@ func VE_ToList(id)
     let out = 0
   endif
   return out
+endfunc
+
+func VE_RemoveCursor(txt)
+  return substitute(a:txt, s:ve_cursor, '', '')
 endfunc
 
 func VE_JumpPage(id, dir)
@@ -265,8 +273,7 @@ func VE_FilterUp(id, key)
   if ((strlen(s:ve_search_txt) < 2) || (s:ve_search_txt[0] == s:ve_cursor))
     return 1
   endif
-
-  let s:ve_search_txt = s:ve_cursor . substitute(s:ve_search_txt, s:ve_cursor, '', '')
+  let s:ve_search_txt = s:ve_cursor . VE_RemoveCursor(s:ve_search_txt)
   return VE_UpdateInputText(a:id)
 endfunc
 
@@ -275,7 +282,7 @@ func VE_FilterDown(id, key)
     return 1
   endif
 
-  let s:ve_search_txt = substitute(s:ve_search_txt, s:ve_cursor, '', '') . s:ve_cursor
+  let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt) . s:ve_cursor
   return VE_UpdateInputText(a:id)
 endfunc
 
@@ -306,6 +313,7 @@ func VE_FilterRight(id, key)
 endfunc
 
 func VE_FilterLeft(id, key)
+  
   let split_s = split(s:ve_search_txt, s:ve_cursor)
   let l = len(split_s)
   if (l == 0 || s:ve_search_txt[0] == s:ve_cursor)
@@ -397,17 +405,34 @@ func VE_FilterInput(id, key)
   return VE_UpdateInputText(a:id)
 endfunc
 
-func VE_FilterSplitNamePath(text)
-  let split_s = split(a:text, '\')
-  if (len(split_s) < 0)
-    let split_s = split(a:text, '/')
+func VE_FilterSplitNamePath(txt)
+
+  let pos = stridx(a:txt, '/')
+  if (pos == -1)
+    let pos = stridx(a:txt, '\')
   endif
+
+  return pos
 endfunc
 
 func VE_FilterClearName(id, key)
+
+  let pos = VE_FilterSplitNamePath(s:ve_search_txt)
+  if (pos > 0) 
+    let s:ve_search_txt = s:ve_search_txt[pos:]
+    return VE_UpdateInputText(a:id)
+  endif
+  return 1
 endfunc
 
 func VE_FilterClearPath(id, key)
+
+  let pos = VE_FilterSplitNamePath(s:ve_search_txt)
+  if (pos > 0) 
+    let s:ve_search_txt = s:ve_search_txt[:pos - 1]
+    return VE_UpdateInputText(a:id)
+  endif
+  return 1
 endfunc
 
 func VE_FilterInputMode(id, key)
@@ -544,8 +569,6 @@ func VE_Callback(id, result)
   let r = a:result[0]
   let m = a:result[1]
 
-  echo g:ve_r_types[r]
-
   if (r > -1)
     if (m == s:ve_open_enter)
       if (g:ve_r_types[r])
@@ -578,16 +601,27 @@ func VE_Callback(id, result)
   return 1
 endfunc
 
-function VE()
+function VE(keep_prev_search = 1)
 
-  call VE_Reset()
-
-  if (!VE_SearchW(s:ve_search_txt, 0))
-    return 0
+  if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
+    let s:ve_search_txt = ""
   endif
 
+  call VE_Search(s:ve_search_txt)
+
+endfunction
+
+function VE_Search(txt)
+
+  call VE_Reset()
+  let search_text = s:ve_cursor . " " . trim(VE_RemoveCursor(a:txt))
+
+  if (!VE_SearchW(search_text, 0))
+    return 0
+  endif
+  
   let ve_args = #{
-          \ title:'vim-Everything',
+  	  \ title:'vim-Everything',
           \ filter: 'VE_Filter',
           \ callback: 'VE_Callback',
           \ resize: 'g:ve_resize',
@@ -604,3 +638,20 @@ function VE()
 
   call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), ve_args)
 endfunc
+
+function VE_SearchInPath(path)
+
+  let txt = a:path
+  let pos = VE_FilterSplitNamePath(txt)
+
+  if (pos > 0)
+    let txt = txt[pos:]
+  endif
+  
+  call VE_Search(txt)
+
+endfunction
+
+funct VE_Path()
+  call VE_SearchInPath(s:ve_search_txt)
+endfunction
