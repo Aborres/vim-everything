@@ -422,7 +422,7 @@ func VE_FilterClearName(id, key)
   let pos = VE_FilterSplitNamePath(s:ve_search_txt)
   if (pos > 0) 
     let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
-    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[pos:]
+    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[pos - 1:]
     return VE_UpdateInputText(a:id)
   endif
   return 1
@@ -433,7 +433,7 @@ func VE_FilterClearPath(id, key)
   let pos = VE_FilterSplitNamePath(s:ve_search_txt)
   if (pos > 0) 
     let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
-    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[:pos - 1]
+    let s:ve_search_txt = s:ve_search_txt[:pos - 1] . s:ve_cursor
     return VE_UpdateInputText(a:id)
   endif
   return 1
