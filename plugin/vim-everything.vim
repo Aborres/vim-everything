@@ -2,7 +2,7 @@
 let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
 let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
 let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
-let g:ve_use_python3 = 1
+let g:ve_use_python3 = 0
 
 " VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
 " VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
@@ -595,6 +595,15 @@ endfunc
 
 function VE(keep_prev_search = 1)
 
+  if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
+    let s:ve_search_txt = ""
+  endif
+
+  call VE_Search(s:ve_search_txt)
+
+endfunction
+
+function VE_Init()
   if (s:ve_initialized == 0)
 
     let wrapper_file = escape(s:ve_root_dir, ' ') . '\..\python\wrapper.py'
@@ -607,16 +616,11 @@ function VE(keep_prev_search = 1)
 
     let s:ve_initialized = 1
   endif
-
-  if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
-    let s:ve_search_txt = ""
-  endif
-
-  call VE_Search(s:ve_search_txt)
-
 endfunction
 
 function VE_Search(txt)
+
+  call VE_Init()
 
   call VE_Reset()
   let search_text = s:ve_cursor . " " . trim(VE_RemoveCursor(a:txt))
