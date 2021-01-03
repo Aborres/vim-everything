@@ -2,6 +2,7 @@
 let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
 let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
 let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
+let g:ve_use_python3 = 1
 
 " VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
 " VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
@@ -30,6 +31,7 @@ let g:ve_tedit = 'tabe '   "Default action when pressing T on a file
 
 "private
 let s:ve_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let s:ve_initialized = 0 
 
 "Constants
 let s:ve_open_enter = 0
@@ -140,27 +142,13 @@ func VE_SearchW(text, from)
   let s:ve_offset_txt = a:from 
   let s:ve_status = 1
 
-python << EOF
-import sys
-from os.path import normpath, join
-import vim
-
-plugin_root_dir = vim.eval('s:ve_root_dir')
-python_root_dir = normpath(join(plugin_root_dir, '..', 'python'))
-sys.path.insert(0, python_root_dir)
-
-from vim_everything import *
-
-text = str(vim.eval('s:ve_search_txt'))
-f = int(vim.eval('s:ve_offset_txt'))
-max = int(vim.eval('g:ve_list_size'))
-
-vim.command('let s:ve_status=%s'%VE_Search(text, f, max))
-
-EOF
+  if (g:ve_use_python3 == 1)
+    python3 VE_SearchWrapper()
+  else
+    python VE_SearchWrapper()
+  endif
 
   return s:ve_status
-
 endfunc
 
 func VE_JumpToElement(id, e)
@@ -606,6 +594,19 @@ func VE_Callback(id, result)
 endfunc
 
 function VE(keep_prev_search = 1)
+
+  if (s:ve_initialized == 0)
+
+    let wrapper_file = escape(s:ve_root_dir, ' ') . '\..\python\wrapper.py'
+
+    if (g:ve_use_python3 == 1)
+      exe 'py3file ' . wrapper_file
+    else
+      exe 'pyfile ' . wrapper_file
+    endif
+
+    let s:ve_initialized = 1
+  endif
 
   if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
     let s:ve_search_txt = ""

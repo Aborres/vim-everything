@@ -1,14 +1,30 @@
 from everything import *
+
+import sys
 import vim
 import threading
 
+def __Translate(buff):
+
+  out = buff.encode().decode('unicode-escape')
+
+  if (sys.version_info >= (3,0)):
+    out = out[2:]
+
+  return out.replace("'b", "")
+
 def __UpdateVimBuffers(names, paths, types):
   out = []
+
+  count = len(paths)
+  for i in range(0, count):
+    paths[i] = __Translate(paths[i])
 
   count = len(names)
 
   curr = 1
   for i in range(0, count):
+    #names[i] = __Translate(names[i])
     curr = max(len(names[i]), curr)
 
   for i in range(0, count):
@@ -18,7 +34,7 @@ def __UpdateVimBuffers(names, paths, types):
       s += " "
     s += " | "
     s += paths[i]
-    out.append(s)
+    out.append(__Translate(s))
 
   vim.command("let g:ve_r_names=%s"%names)
   vim.command("let g:ve_r_paths=%s"%paths)
@@ -34,7 +50,7 @@ def VE_Search(text, f, buff_size):
   # the encoding is important
   # it gets lost when calling from VIM, probably because of vim's parsing
   if (len(text)):
-    text = text.decode('unicode-escape')
+    text = __Translate(text)
 
   e = Everything()
   if (not e.search(text, f, buff_size)):
@@ -44,3 +60,4 @@ def VE_Search(text, f, buff_size):
   vim.command("let g:ve_num_r=%s"%e.num_results)
   __UpdateVimBuffers(e.file_names, e.file_paths, e.file_types)
   return 1
+
