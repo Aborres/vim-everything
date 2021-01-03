@@ -12,7 +12,7 @@ def __TranslateP3(buff):
 
 def __TranslateInput(buff):
   if (sys.version_info >= (3,0)):
-      return TranslateP3(buff)
+      return __TranslateP3(buff)
 
   return buff.decode('unicode-escape')
 

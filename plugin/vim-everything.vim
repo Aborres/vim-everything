@@ -2,7 +2,7 @@
 let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
 let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
 let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
-let g:ve_use_python3 = 0
+let g:ve_use_python3 = 1 "set g:ve_use_python3 = 0 to use python27
 
 " VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
 " VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
