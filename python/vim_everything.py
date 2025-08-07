@@ -5,37 +5,13 @@ import vim
 import threading
 import unicodedata
 
-def __TranslateP3(buff):
-  out = buff.encode().decode('unicode-escape')
-  out = out[2:]
-  return out.replace("'b", "")
-
-def __TranslateInput(buff):
-  if (sys.version_info >= (3,0)):
-      return __TranslateP3(buff)
-
-  return buff.decode('unicode-escape')
-
-
-def __Translate(buff):
-
-  if (sys.version_info >= (3,0)):
-    return __TranslateP3(buff)
-  
-  return buff
-
 def __UpdateVimBuffers(names, paths, types):
   out = []
-
-  count = len(paths)
-  for i in range(0, count):
-    paths[i] = __Translate(paths[i])
 
   count = len(names)
 
   curr = 1
   for i in range(0, count):
-    names[i] = __Translate(names[i])
     curr = max(len(names[i]), curr)
 
   for i in range(0, count):
@@ -45,7 +21,7 @@ def __UpdateVimBuffers(names, paths, types):
       s += " "
     s += " | "
     s += paths[i]
-    out.append(__Translate(s))
+    out.append(s)
 
   vim.command("let g:ve_r_names=%s"%names)
   vim.command("let g:ve_r_paths=%s"%paths)
@@ -55,13 +31,8 @@ def __UpdateVimBuffers(names, paths, types):
 def VE_Search(text, f, buff_size):
 
   text = text.replace("|", "") #remove cursor
-  text = text.replace("\\", "\\\\")
-  text = text.replace("/", "\\\\") #standard any separator so Everything is happy
-
-  # the encoding is important
-  # it gets lost when calling from VIM, probably because of vim's parsing
-  if (len(text)):
-    text = __TranslateInput(text)
+  text = text.replace("/", "\\") #standard any separator so Everything is happy
+  text = text.replace("\\\\", "\\")
 
   e = Everything()
   if (not e.search(text, f, buff_size)):

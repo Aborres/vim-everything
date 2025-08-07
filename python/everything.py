@@ -4,21 +4,21 @@ import sys
 import time
 
 #defines
-EVERYTHING_REQUEST_FILE_NAME = 0x00000001
-EVERYTHING_REQUEST_PATH = 0x00000002
-EVERYTHING_REQUEST_FULL_PATH_AND_FILE_NAME = 0x00000004
-EVERYTHING_REQUEST_EXTENSION = 0x00000008
-EVERYTHING_REQUEST_SIZE = 0x00000010
-EVERYTHING_REQUEST_DATE_CREATED = 0x00000020
-EVERYTHING_REQUEST_DATE_MODIFIED = 0x00000040
-EVERYTHING_REQUEST_DATE_ACCESSED = 0x00000080
-EVERYTHING_REQUEST_ATTRIBUTES = 0x00000100
-EVERYTHING_REQUEST_FILE_LIST_FILE_NAME = 0x00000200
-EVERYTHING_REQUEST_RUN_COUNT = 0x00000400
-EVERYTHING_REQUEST_DATE_RUN = 0x00000800
-EVERYTHING_REQUEST_DATE_RECENTLY_CHANGED = 0x00001000
-EVERYTHING_REQUEST_HIGHLIGHTED_FILE_NAME = 0x00002000
-EVERYTHING_REQUEST_HIGHLIGHTED_PATH = 0x00004000
+EVERYTHING_REQUEST_FILE_NAME                           = 0x00000001
+EVERYTHING_REQUEST_PATH                                = 0x00000002
+EVERYTHING_REQUEST_FULL_PATH_AND_FILE_NAME             = 0x00000004
+EVERYTHING_REQUEST_EXTENSION                           = 0x00000008
+EVERYTHING_REQUEST_SIZE                                = 0x00000010
+EVERYTHING_REQUEST_DATE_CREATED                        = 0x00000020
+EVERYTHING_REQUEST_DATE_MODIFIED                       = 0x00000040
+EVERYTHING_REQUEST_DATE_ACCESSED                       = 0x00000080
+EVERYTHING_REQUEST_ATTRIBUTES                          = 0x00000100
+EVERYTHING_REQUEST_FILE_LIST_FILE_NAME                 = 0x00000200
+EVERYTHING_REQUEST_RUN_COUNT                           = 0x00000400
+EVERYTHING_REQUEST_DATE_RUN                            = 0x00000800
+EVERYTHING_REQUEST_DATE_RECENTLY_CHANGED               = 0x00001000
+EVERYTHING_REQUEST_HIGHLIGHTED_FILE_NAME               = 0x00002000
+EVERYTHING_REQUEST_HIGHLIGHTED_PATH                    = 0x00004000
 EVERYTHING_REQUEST_HIGHLIGHTED_FULL_PATH_AND_FILE_NAME = 0x00008000
 
 EVERYTHING_SORT_NAME_ASCENDING                   = 1
@@ -56,6 +56,9 @@ EVERYTHING_ERROR_IPC	         = 4
 EVERYTHING_ERROR_MEMORY	         = 5
 EVERYTHING_ERROR_INVALIDCALL	 = 6
 
+def DebugLog(txt):
+  print(txt)
+
 class Everything:
   def __init__(self):
     self.num_results = 0
@@ -81,13 +84,16 @@ class Everything:
       print("VE: Failed to load DB, Is Everything running?")
       return
 
-    flags = 3
+    flags = EVERYTHING_REQUEST_FILE_NAME | EVERYTHING_REQUEST_PATH
     self.api.Everything_SetRequestFlags(flags)
     self.api.Everything_SetMatchPath(False)
     self.api.Everything_SetMatchWholeWord(False)
     self.api.Everything_SetRegex(False)
     self.api.Everything_SetOffset(offset)
     self.api.Everything_SetMax(max)
+
+    #DebugLog("Query: {}".format(text))
+    #DebugLog("Searching Text: {}".format(text))
 
     self.api.Everything_SetSearchW(text)
 
@@ -98,6 +104,8 @@ class Everything:
 
     self.total_results = self.api.Everything_GetTotFileResults()
     self.num_results   = self.api.Everything_GetNumResults()
+
+    #DebugLog("Total Results: {}, Num Results: {}".format(self.total_results, self.num_results))
 
     self.file_names = []
     self.file_paths = []
@@ -115,8 +123,8 @@ class Everything:
       name = ctypes.wstring_at(name)
       path = ctypes.wstring_at(path)
 
-      name = str(name.encode('utf-8'))
-      path = str(path.encode('utf-8'))
+      name = str(name)
+      path = str(path)
       path = path.replace("\\", "/")
       if (not is_folder):
         path = path[:path.rfind('/')]
