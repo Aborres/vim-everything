@@ -680,7 +680,7 @@ function VE_SearchInPath(path)
   let l:pos = VE_FilterSplitNamePath(l:txt)
 
   if (l:pos > 0)
-    let l:txt = txt[pos:]
+    let l:txt = l:txt[l:pos:]
   endif
   
   call VE_Search(l:txt)
