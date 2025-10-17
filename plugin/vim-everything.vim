@@ -16,6 +16,7 @@ hi PopupSelected guifg=#000000 guibg=#ffa500
 let g:ve_clear_c    = '~' "Key used to clear input search
 let g:ve_clear_name = '!' "Key used to clear name from the input search
 let g:ve_clear_path = '@' "Key used to clear path from the input search
+let g:ve_clear_ext  = '#' "Key used to clear ext from the input search
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
 
@@ -253,7 +254,7 @@ func VE_UpdateUp(id)
 endfunc
 
 func VE_UpdateInputText(id)
-  let s:ve_curr_pag         = 0
+  let s:ve_curr_pag = 0
   call VE_SearchW(s:ve_search_txt, 0)
   call VE_UpdateScreenBody(a:id)
   return 1
@@ -396,7 +397,6 @@ func VE_FilterInput(id, key)
 endfunc
 
 func VE_FilterSplitNamePath(txt)
-
   let pos = stridx(a:txt, '/')
   if (pos == -1)
     let pos = stridx(a:txt, '\')
@@ -406,18 +406,31 @@ func VE_FilterSplitNamePath(txt)
 endfunc
 
 func VE_FilterClearName(id, key)
-
   let pos = VE_FilterSplitNamePath(s:ve_search_txt)
   if (pos > 0) 
     let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
-    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[pos - 1:]
+    let s:ve_search_txt = s:ve_cursor . " " . s:ve_search_txt[pos - 1:]
+    return VE_UpdateInputText(a:id)
+  endif
+  return 1
+endfunc
+
+func VE_VE_FilterExt(txt)
+  return stridx(a:txt, '.')
+endfunc
+
+func VE_FilterExt(id, key)
+  let path_pos = VE_FilterSplitNamePath(s:ve_search_txt)
+  let ext_pos = VE_VE_FilterExt(s:ve_search_txt)
+  if (path_pos > 0 && ext_pos > 0) 
+    let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
+    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[0:ext_pos] . " " . s:ve_search_txt[path_pos - 1:]
     return VE_UpdateInputText(a:id)
   endif
   return 1
 endfunc
 
 func VE_FilterClearPath(id, key)
-
   let pos = VE_FilterSplitNamePath(s:ve_search_txt)
   if (pos > 0) 
     let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
@@ -456,6 +469,10 @@ func VE_FilterInputMode(id, key)
 
   if (a:key == g:ve_clear_name)
     return VE_FilterClearName(a:id, a:key)
+  endif
+
+  if (a:key == g:ve_clear_ext)
+    return VE_FilterExt(a:id, a:key)
   endif
 
   if (a:key == g:ve_clear_path)
