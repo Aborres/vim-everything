@@ -430,11 +430,11 @@ func VE_VE_FilterExt(txt)
 endfunc
 
 func VE_FilterExt(id, key)
-  let path_pos = VE_FilterSplitNamePath(s:ve_search_txt)
-  let ext_pos = VE_VE_FilterExt(s:ve_search_txt)
-  if (path_pos > 0 && ext_pos > 0) 
+  let l:path_pos = VE_FilterSplitNamePath(s:ve_search_txt)
+  let l:ext_pos = VE_VE_FilterExt(s:ve_search_txt)
+  if (l:path_pos > 0 && l:ext_pos > 0) 
     let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
-    let s:ve_search_txt = s:ve_cursor . s:ve_search_txt[0:ext_pos] . " " . s:ve_search_txt[path_pos - 1:]
+    let s:ve_search_txt = s:ve_search_txt[0:l:ext_pos] . s:ve_cursor . " " . s:ve_search_txt[l:path_pos - 1:]
     return VE_UpdateInputText(a:id)
   endif
   return 1
