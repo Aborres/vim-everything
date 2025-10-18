@@ -14,12 +14,13 @@ let g:ve_use_python3 = 1 "set g:ve_use_python3 = 0 to use python27
 " use PopupSelected to change cursor color
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
-let g:ve_clear_c    = '~' "Key used to clear input search
+let g:ve_clear_c    = '$' "Key used to clear input search
 let g:ve_clear_name = '!' "Key used to clear name from the input search
 let g:ve_clear_path = '@' "Key used to clear path from the input search
 let g:ve_clear_ext  = '#' "Key used to clear ext from the input search
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
+let g:ve_use_alternative_search = 0 "If enabled will use ripgrep
 
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
@@ -607,7 +608,7 @@ func VE_Callback(id, result)
   let l:r = a:result[0]
   let l:m = a:result[1]
 
-  if (l:r > -1)
+  if (l:r > -1 && g:ve_num_r > 0)
     if (l:m == s:ve_open_enter)
       if (g:ve_r_types[r])
         :execute g:ve_explore . g:ve_r_paths[r]
