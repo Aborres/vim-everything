@@ -1,4 +1,11 @@
-from everything import *
+import os
+
+windows = True
+if "win" in os.name.lower():
+  from everything import *
+else:
+  from find import *
+  windows = False
 
 import sys
 import vim
@@ -43,12 +50,21 @@ def VE_Search(text, f, buff_size):
   text = text.replace("/", "\\") #standard any separator so Everything is happy
   text = text.replace("\\\\", "\\")
 
-  e = Everything()
+  use_as = vim.vars["ve_use_alternative_search"]
+
+  e = None
+  if (windows and not use_as):
+    e = Everything()
+  else:
+    e = Find()
+
   if (not e.search(text, f, buff_size)):
     return 0
 
   vim.command("let g:ve_total_r=%s"%e.total_results)
   vim.command("let g:ve_num_r=%s"%e.num_results)
+
   __UpdateVimBuffers(e.file_names, e.file_paths, e.file_types)
+
   return 1
 
