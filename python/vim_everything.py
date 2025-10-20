@@ -1,13 +1,12 @@
-import os
+import sys
 
 windows = True
-if "win" in os.name.lower():
+if "win" in sys.platform.lower():
   from everything import *
 else:
   from find import *
   windows = False
 
-import sys
 import vim
 import threading
 import unicodedata
