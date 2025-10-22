@@ -708,6 +708,6 @@ function VE_SearchInPath(path)
 
 endfunction
 
-funct VE_Path()
+function VE_Path()
   call VE_SearchInPath(s:ve_search_txt)
 endfunction
