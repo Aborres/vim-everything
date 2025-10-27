@@ -682,6 +682,7 @@ function VE_Search(txt)
           \ callback: 'VE_Callback',
           \ resize: 'g:ve_resize',
           \ highlight: 'g:ve_style',
+          \ borderchars: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
           \ wrap: 0,
           \ scrollbar: 1,
           \ close: 'click'
