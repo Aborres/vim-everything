@@ -35,6 +35,7 @@ let g:ve_tedit = 'tabe '   "Default action when pressing T on a file
 "private
 let s:ve_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let s:ve_initialized = 0 
+let s:ve_last_search = ""
 
 "Constants
 let s:ve_open_enter = 0
@@ -149,6 +150,8 @@ endfunc
 func VE_SearchW(text, from)
 
   let s:ve_search_txt = a:text
+  let s:ve_last_search = s:ve_search_txt
+
   let s:ve_offset_txt = a:from 
   let s:ve_status = 1
 
@@ -441,14 +444,25 @@ func VE_FilterExt(id, key)
   return 1
 endfunc
 
+func VE_FilterClearPathW(text)
+  let l:new_text = a:text
+  let l:pos = VE_FilterSplitNamePath(l:new_text)
+  if (l:pos > 0) 
+    let l:new_text = l:new_text[:l:pos - 1]
+  endif
+  return l:new_text
+endfunc
+
 func VE_FilterClearPath(id, key)
 
-  let l:pos = VE_FilterSplitNamePath(s:ve_search_txt)
-  if (l:pos > 0) 
-    let s:ve_search_txt = VE_RemoveCursor(s:ve_search_txt)
-    let s:ve_search_txt = s:ve_search_txt[:pos - 1] . s:ve_cursor
+  let l:search_txt = VE_RemoveCursor(s:ve_search_txt)
+  let l:new_text = VE_FilterClearPathW(l:search_txt)
+  if (l:new_text != l:search_txt)
+    let s:ve_search_txt = trim(l:new_text) . " " . s:ve_cursor
+    endif
     return VE_UpdateInputText(a:id)
   endif
+
   return 1
 endfunc
 
@@ -640,7 +654,7 @@ func VE_Callback(id, result)
   return 1
 endfunc
 
-function VE(keep_prev_search = 1)
+func VE(keep_prev_search = 1)
 
   if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
     let s:ve_search_txt = ""
@@ -648,12 +662,12 @@ function VE(keep_prev_search = 1)
 
   call VE_Search(s:ve_search_txt)
 
-endfunction
+endfunc
 
-function VE_Init()
+func VE_Init()
   if (s:ve_initialized == 0)
 
-    let l:wrapper_file = escape(s:ve_root_dir, ' ') . '\..\python\wrapper.py'
+    let l:wrapper_file = escape(s:ve_root_dir, ' ') . '/../python/wrapper.py'
 
     if (g:ve_use_python3 == 1)
       exe 'py3file ' . l:wrapper_file
@@ -663,14 +677,20 @@ function VE_Init()
 
     let s:ve_initialized = 1
   endif
-endfunction
+endfunc
 
-function VE_Search(txt)
+func VE_Search(txt)
 
   call VE_Init()
 
   call VE_Reset()
-  let l:search_text = s:ve_cursor . " " . trim(VE_RemoveCursor(a:txt))
+
+  " If we are searching with a path insert the cursor at the front to start writing there
+  " Otherwise it might be an already formed query
+  let l:search_text = a:txt
+  if ((l:search_text[0] == "\\") || (l:search_text[0] == "/"))
+    let l:search_text = s:ve_cursor . " " . trim(VE_RemoveCursor(l:search_text))
+  endif
 
   if (!VE_SearchW(l:search_text, 0))
     return 0
@@ -696,7 +716,7 @@ function VE_Search(txt)
   call popup_menu(VE_FormScreenText(s:ve_search_txt, 0), l:ve_args)
 endfunc
 
-function VE_SearchInPath(path)
+func VE_SearchInPath(path)
 
   let l:txt = a:path
   let l:pos = VE_FilterSplitNamePath(l:txt)
@@ -704,11 +724,19 @@ function VE_SearchInPath(path)
   if (l:pos > 0)
     let l:txt = l:txt[l:pos:]
   endif
+
+  if (g:ve_keep_prev_search)
+    let l:last_search = VE_RemoveCursor(s:ve_last_search)
+    let l:file_name   = VE_FilterClearPathW(l:last_search)
+    if (l:file_name != s:ve_last_search)
+      let l:txt = trim(l:file_name) . s:ve_cursor . ' ' . l:txt
+    endif
+  endif
   
   call VE_Search(l:txt)
 
-endfunction
+endfunc
 
-function VE_Path()
+func VE_Path()
   call VE_SearchInPath(s:ve_search_txt)
-endfunction
+endfunc
