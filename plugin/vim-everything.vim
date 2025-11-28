@@ -21,6 +21,7 @@ let g:ve_clear_ext  = '#' "Key used to clear ext from the input search
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
 let g:ve_use_alternative_search = 0 "If enabled will use ripgrep
+let g:ve_switch_focus = 1 "Whether to switch to a buffer if the search file is already opened
 
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
@@ -613,8 +614,32 @@ func VE_Filter(id, key)
 
 endfunc
 
-func VE_OpenFile(r)
+func VE_GetFileFullPath(r)
   return g:ve_r_paths[a:r] . "/" . g:ve_r_names[a:r]
+endfunc
+
+func VE_IsFileAlreadyOpened(path)
+
+  let l:buffer_number = bufnr(a:path)
+  if l:buffer_number <= 0
+    return -1
+  endif
+
+  return l:buffer_number
+
+endfunc
+
+func VE_FocusBuffer(buffer)
+
+  let l:wnr = bufwinnr(a:buffer)
+  if l:wnr != -1
+    execute l:wnr . 'wincmd w'
+    return 1
+  "else "This is for switching windows to the one containing the buffer
+  "  execute 'buffer' l:bnr
+  endif
+
+  return 0
 endfunc
 
 func VE_Callback(id, result)
@@ -623,29 +648,45 @@ func VE_Callback(id, result)
   let l:m = a:result[1]
 
   if (l:r > -1 && g:ve_num_r > 0)
+
+    let l:path = g:ve_r_paths[l:r]
+    let l:is_folder = g:ve_r_types[l:r]
+
+    if (g:ve_switch_focus)
+
+      let l:full_path = l:is_folder ? l:path : VE_GetFileFullPath(l:r)
+
+      let l:buffer = VE_IsFileAlreadyOpened(l:full_path)
+      if (l:buffer > -1)
+        if (VE_FocusBuffer(l:buffer))
+          return 1
+        endif
+      endif
+    endif
+
     if (l:m == s:ve_open_enter)
-      if (g:ve_r_types[r])
-        :execute g:ve_explore . g:ve_r_paths[r]
+      if (l:is_folder)
+        :execute g:ve_explore . l:path
       else
-        :execute g:ve_edit . VE_OpenFile(r)
+        :execute g:ve_edit . VE_GetFileFullPath(l:r)
       endif
     elseif (l:m == s:ve_open_vs)
-      if (g:ve_r_types[r])
-        :execute g:ve_vexplore . g:ve_r_paths[r]
+      if (l:is_folder)
+        :execute g:ve_vexplore . l:path
       else
-        :execute g:ve_vedit . VE_OpenFile(r) 
+        :execute g:ve_vedit . VE_GetFileFullPath(l:r) 
       endif
     elseif (l:m == s:ve_open_sp)
-      if (g:ve_r_types[r])
-        :execute g:ve_hexplore . g:ve_r_paths[r]
+      if (l:is_folder)
+        :execute g:ve_hexplore . l:path
       else
-        :execute g:ve_hedit . VE_OpenFile(r) 
+        :execute g:ve_hedit . VE_GetFileFullPath(l:r)
       endif
     elseif (l:m == s:ve_open_tab)
-      if (g:ve_r_types[r])
-        :execute g:ve_texplore . g:ve_r_paths[r]
+      if (l:is_folder)
+        :execute g:ve_texplore . l:path
       else
-        :execute g:ve_tedit . VE_OpenFile(r) 
+        :execute g:ve_tedit . VE_GetFileFullPath(l:r)
       endif
     else 
       echo "VE: Undefined mode to open file"
