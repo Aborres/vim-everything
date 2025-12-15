@@ -1,0 +1,219 @@
+vim-everything Preface
+
+===============================================================================
+Contents ~
+
+ 1. Introduction                                  |vim-everything-introduction|
+ 2. Usage                                                |vim-everything-usage|
+ 3. Variables                                        |vim-everything-variables|
+
+===============================================================================
+                                                  *vim-everything-introduction*
+Introduction ~
+
+vim-everything integrates Everything (https://www.voidtools.com/)
+directly into vim using popup windows.
+
+The plugin also supports a fallback to rg for platform that don't support
+Everything, the rg path can be enabled on Windows too, see:
+
+                   |g:ve_use_alternative_search|
+
+However, the default, maintained and recommended path is Everything.
+
+By default, queries of this style are run through Everything
+>
+  some_file.txt \some_path\ 
+<
+Make sure to check the variables below for a list of keybindings that make
+editing your query faster.
+
+===============================================================================
+                                                         *vim-everything-usage*
+Usage ~
+
+VE(keep_prev_search = 1)
+VE_Path()               
+VE_SearchInPath(path)   
+VE_Search(txt)          
+
+===============================================================================
+                                                     *vim-everything-variables*
+Variables ~
+
+  Globals:~
+  |g:ve_list_size| 
+  |g:ve_enable_number_jump|
+  |g:ve_resize|
+  |g:ve_keep_prev_search|
+  |g:ve_use_python3|
+
+  KeyBindings:~
+  |g:ve_clear_c|
+  |g:ve_clear_name|
+  |g:ve_clear_path|
+  |g:ve_clear_ext|
+
+  Icons:~
+  |g:ve_cursor|
+
+  UI:~
+  |g:ve_fixed_w|
+  |g:ve_use_alternative_search|
+
+  Functions:~
+  |g:ve_explore|
+  |g:ve_vexplore|
+  |g:ve_hexplore|
+  |g:ve_texplore|
+  |g:ve_edit|
+  |g:ve_vedit|
+  |g:ve_hedit|
+  |g:ve_tedit|
+
+------------------------------------------------------------------------------
+                                                               *g:ve_list_size*
+>
+  let g:ve_list_size = 20 
+<
+
+Changes the minimum number of elements to show in searches
+------------------------------------------------------------------------------
+                                                     *g:ve_enable_number_jump*
+>
+  let g:ve_enable_number_jump = 1
+<
+
+If enabled limits g:ve_list_size to 20
+------------------------------------------------------------------------------
+                                                                 *g:ve_resize*
+>
+  let g:ve_resize = 1 
+<
+
+Toggles if the popup window should be resizeable with the mouse
+------------------------------------------------------------------------------
+                                                       *g:ve_keep_prev_search*
+>
+  let g:ve_keep_prev_search = 1 
+<
+
+Forces VE to keep the input text in between searchs
+------------------------------------------------------------------------------
+                                                            *g:ve_use_python3*
+>
+  let g:ve_use_python3 = 1 
+<
+
+set g:ve_use_python3 = 0 to use python27
+------------------------------------------------------------------------------
+                                                                *g:ve_clear_c*
+>
+  let g:ve_clear_c    = '$' 
+<
+
+Key used to clear input search
+------------------------------------------------------------------------------
+                                                             *g:ve_clear_name*
+>
+  let g:ve_clear_name = '!' 
+<
+
+Key used to clear name from the input search
+------------------------------------------------------------------------------
+                                                             *g:ve_clear_path*
+>
+  let g:ve_clear_path = '@' 
+<
+
+Key used to clear path from the input search
+------------------------------------------------------------------------------
+                                                              *g:ve_clear_ext*
+>
+  let g:ve_clear_ext  = '#' 
+<
+
+Key used to clear ext from the input search
+------------------------------------------------------------------------------
+                                                                 *g:ve_cursor*
+>
+  let g:ve_cursor = '|' 
+<
+
+------------------------------------------------------------------------------
+                                                                *g:ve_fixed_w*
+>
+  let g:ve_fixed_w = 128 
+<
+
+if set to any value, the window will have that size
+------------------------------------------------------------------------------
+                                                 *g:ve_use_alternative_search*
+>
+  let g:ve_use_alternative_search = 0 
+<
+
+If enabled will use ripgrep, this is the default for all platforms that
+don't support Everything. 
+------------------------------------------------------------------------------
+                                                                *g:ve_explore*
+>
+  let g:ve_explore  = 'Explore '  
+<
+
+Default action when pressing Enter on a folder
+------------------------------------------------------------------------------
+                                                               *g:ve_vexplore*
+>
+  let g:ve_vexplore = 'Vexplore ' 
+<
+
+Default action when pressing V on a folder
+------------------------------------------------------------------------------
+                                                               *g:ve_hexplore*
+>
+  let g:ve_hexplore = 'Hexplore ' 
+<
+
+Default action when pressing S on a folder
+------------------------------------------------------------------------------
+                                                               *g:ve_texplore*
+>
+  let g:ve_texplore = 'Texplore ' 
+<
+
+Default action when pressing T on a folder
+------------------------------------------------------------------------------
+                                                                   *g:ve_edit*
+>
+  let g:ve_edit  = 'edit '   
+<
+
+Default action when pressing Enter on a file
+------------------------------------------------------------------------------
+                                                                  *g:ve_vedit*
+>
+  let g:ve_vedit = 'vsplit ' 
+<
+
+Default action when pressing V on a file
+------------------------------------------------------------------------------
+                                                                  *g:ve_hedit*
+>
+  let g:ve_hedit = 'split '  
+<
+
+Default action when pressing S on a file
+------------------------------------------------------------------------------
+                                                                  *g:ve_tedit*
+>
+  let g:ve_tedit = 'tabe '   
+<
+
+Default action when pressing T on a file
+------------------------------------------------------------------------------
+hi PopupSelected guifg=#000000 guibg=#ffa500
+
+Use PopupNotification to change BG color
+Use PopupSelected to change cursor color
+===============================================================================
