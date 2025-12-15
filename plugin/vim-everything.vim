@@ -22,6 +22,7 @@ let g:ve_cursor = '|'
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
 let g:ve_use_alternative_search = 0 "If enabled will use ripgrep
+let g:ve_switch_focus = 1 "Whether to switch to a buffer if the search file is already opened
 
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder
 let g:ve_vexplore = 'Vexplore ' "Default action when pressing V on a folder
@@ -35,7 +36,7 @@ let g:ve_tedit = 'tabe '   "Default action when pressing T on a file
 
 let g:ve_last_search = ""
 
-func! VE(keep_prev_search = 1) abort
+func VE(keep_prev_search = 1)
 
   if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
     let g:ve_search_txt = ""

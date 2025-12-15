@@ -60,6 +60,7 @@ Variables ~
   UI:~
   |g:ve_fixed_w|
   |g:ve_use_alternative_search|
+  |g:ve_switch_focus|
 
   Functions:~
   |g:ve_explore|
@@ -155,6 +156,12 @@ if set to any value, the window will have that size
 
 If enabled will use ripgrep, this is the default for all platforms that
 don't support Everything. 
+------------------------------------------------------------------------------
+                                                           *g:ve_switch_focus*
+>
+  let g:ve_switch_focus = 1
+<
+Whether to switch to a buffer if the search file is already opened
 ------------------------------------------------------------------------------
                                                                 *g:ve_explore*
 >
