@@ -10,7 +10,7 @@ class Find:
     self.results = []
     self.file_types = []
 
-  def search(self, text, offset = 0, max = 10):
+  def search(self, text, type = 0, offset = 0, max = 10):
     self.reset()
 
     text = self.normalize(text)

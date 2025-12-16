@@ -1,8 +1,9 @@
-let g:ve_list_size = 20 "Changes the minimum number of elements to show in searches
+let g:ve_list_size = 20         "Changes the minimum number of elements to show in searches
 let g:ve_enable_number_jump = 1 "If enabled limits g:ve_list_size to 20
-let g:ve_resize = 1 "Toggles if the popup window should be resizeable with the mouse
-let g:ve_keep_prev_search = 1 "Forces VE to keep the input text in between searchs
-let g:ve_use_python3 = 1 "set g:ve_use_python3 = 0 to use python27
+let g:ve_resize = 1             "Toggles if the popup window should be resizeable with the mouse
+let g:ve_keep_prev_search = 1   "Forces VE to keep the input text in between searchs
+let g:ve_use_python3 = 1        "Set g:ve_use_python3 = 0 to use python27
+let g:ve_file_results = 1       "0: All, 1: Files, 2: Folders, this setting doesn't work with the rg fallback
 
 " VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
 " VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
@@ -18,8 +19,8 @@ let g:ve_clear_name = '!' "Key used to clear name from the input search
 let g:ve_clear_path = '@' "Key used to clear path from the input search
 let g:ve_clear_ext  = '#' "Key used to clear ext from the input search
 
-let g:ve_cursor = '|' 
-let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+let g:ve_cursor = '|' "Cursor Icon
+let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰'] "Floating Window Borders
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
 let g:ve_use_alternative_search = 0 "If enabled will use ripgrep

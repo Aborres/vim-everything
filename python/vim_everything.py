@@ -57,13 +57,21 @@ def VE_Search(text, f, buff_size):
   else:
     e = Find()
 
-  if (not e.search(text, f, buff_size)):
+  type = vim.vars["ve_file_results"]
+
+  if (not e.search(text, type, f, buff_size)):
     return 0
 
-  vim.command("let g:ve_total_r=%s"%e.total_results)
-  vim.command("let g:ve_num_r=%s"%e.num_results)
+  total_r    = e.query.total
+  num_r      = e.query.num
+  file_names = e.query.names
+  file_paths = e.query.paths
+  file_types = e.query.types
 
-  __UpdateVimBuffers(e.file_names, e.file_paths, e.file_types)
+  vim.command("let g:ve_total_r=%s"%total_r)
+  vim.command("let g:ve_num_r=%s"%num_r)
+
+  __UpdateVimBuffers(file_names, file_paths, file_types)
 
   return 1
 

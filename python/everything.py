@@ -56,17 +56,39 @@ EVERYTHING_ERROR_IPC	         = 4
 EVERYTHING_ERROR_MEMORY	         = 5
 EVERYTHING_ERROR_INVALIDCALL	 = 6
 
-def DebugLog(txt):
-  print(txt)
+class EverythingResults:
+  def __init__(self, name):
+    self.name = name
+    self.num     = 0
+    self.total   = 0
+    self.names   = []
+    self.paths   = []
+    self.results = []
+    self.types   = []
+
+  def check(self):
+    l_n = len(self.names)
+    l_p = len(self.paths)
+    l_r = len(self.results)
+    l_t = len(self.types)
+    v_n = self.num != l_n
+    v_p = self.num != l_p
+    v_r = self.num != l_r
+    v_t = self.num != l_t
+    if (v_n or v_p or v_r or v_t):
+      print(f"Invalid results from Everything ({self.name}): {self.num}, {l_n}, {l_p}, {l_r}, {l_t}")
+
+  def reset(self):
+    self.num     = 0
+    self.total   = 0
+    self.names   = []
+    self.paths   = []
+    self.results = []
+    self.types   = []
 
 class Everything:
   def __init__(self):
-    self.num_results = 0
-    self.total_results = 0
-    self.result     = []
-    self.file_names = []
-    self.file_paths = []
-    self.file_types = []
+    self.query = EverythingResults("Query")
 
     self.dll_name = "Everything32.dll"
     if (sys.maxsize > 2**32):
@@ -77,7 +99,7 @@ class Everything:
     self.api.Everything_GetResultDateModified.argtypes = [ctypes.c_int,ctypes.POINTER(ctypes.c_ulonglong)]
     self.api.Everything_GetResultSize.argtypes = [ctypes.c_int,ctypes.POINTER(ctypes.c_ulonglong)]
 
-  def search(self, text, offset = 0, max = 10):
+  def search(self, text, query_type = 0, offset = 0, max = 10):
     self.reset()
 
     if (not self.api.Everything_IsDBLoaded()):
@@ -92,30 +114,29 @@ class Everything:
     self.api.Everything_SetOffset(offset)
     self.api.Everything_SetMax(max)
 
-    #DebugLog("Query: {}".format(text))
-    #DebugLog("Searching Text: {}".format(text))
+    query = text
+    if (query_type == 1):
+      query = f"file:{text}"
+    elif(query_type == 2):
+      query = f"folder:{text}"
 
-    self.api.Everything_SetSearchW(text)
+    self.api.Everything_SetSearchW(query)
 
     if (not self.api.Everything_QueryW(True)):
       print("VE: Failed when trying to Query")
       self.printEverythingError()
       return False
 
-    self.total_results = self.api.Everything_GetTotFileResults()
-    self.num_results   = self.api.Everything_GetNumResults()
+    self.query.reset()
+    self.query.total = self.api.Everything_GetTotResults()
+    self.query.num   = self.api.Everything_GetNumResults()
 
-    #DebugLog("Total Results: {}, Num Results: {}".format(self.total_results, self.num_results))
-
-    self.file_names = []
-    self.file_paths = []
-    self.file_types = []
-    self.result = [] 
-    for i in range(self.num_results):
+    for i in range(self.query.num):
 
       name = self.api.Everything_GetResultFileNameW(i)
-      is_folder = self.api.Everything_IsFolderResult(name)
-      self.file_types.append(is_folder)
+      is_folder = self.api.Everything_IsFolderResult(i)
+
+      self.query.types.append(is_folder)
 
       path = ctypes.create_unicode_buffer(260)
       self.api.Everything_GetResultFullPathNameW(i, path, 260)
@@ -129,9 +150,13 @@ class Everything:
       if (not is_folder):
         path = path[:path.rfind('/')]
 
-      self.file_names.append(name)
-      self.file_paths.append(path)
-      self.result.append((name, path))
+      self.query.names.append(name)
+      self.query.paths.append(path)
+
+      res = (name, path)
+      self.query.results.append(res)
+
+    self.query.check()
 
     return True
 

@@ -47,6 +47,7 @@ Variables ~
   |g:ve_resize|
   |g:ve_keep_prev_search|
   |g:ve_use_python3|
+  |g:ve_file_results|
 
   KeyBindings:~
   |g:ve_clear_c|
@@ -56,6 +57,7 @@ Variables ~
 
   Icons:~
   |g:ve_cursor|
+  |g:ve_borders|
 
   UI:~
   |g:ve_fixed_w|
@@ -106,7 +108,13 @@ Forces VE to keep the input text in between searchs
   let g:ve_use_python3 = 1 
 <
 
-set g:ve_use_python3 = 0 to use python27
+Set g:ve_use_python3 = 0 to use python27
+------------------------------------------------------------------------------
+                                                           *g:ve_file_results*
+>
+  let g:ve_file_results = 1
+<
+0: All, 1: Files, 2: Folders, this setting doesn't work with the rg fallback
 ------------------------------------------------------------------------------
                                                                 *g:ve_clear_c*
 >
@@ -140,7 +148,13 @@ Key used to clear ext from the input search
 >
   let g:ve_cursor = '|' 
 <
-
+Cursor Icon
+------------------------------------------------------------------------------
+                                                                *g:ve_borders*
+> 
+  let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+<
+Floating Window Borders
 ------------------------------------------------------------------------------
                                                                 *g:ve_fixed_w*
 >
