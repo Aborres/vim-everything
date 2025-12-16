@@ -19,6 +19,7 @@ let g:ve_clear_path = '@' "Key used to clear path from the input search
 let g:ve_clear_ext  = '#' "Key used to clear ext from the input search
 
 let g:ve_cursor = '|' 
+let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
 let g:ve_use_alternative_search = 0 "If enabled will use ripgrep
@@ -69,7 +70,7 @@ func! VE_Search(txt) abort
           \ callback: 've#callback#call',
           \ resize: 'g:ve_resize',
           \ highlight: 'g:ve_style',
-          \ borderchars: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+          \ borderchars: g:ve_borders,
           \ wrap: 0,
           \ scrollbar: 1,
           \ close: 'click'
