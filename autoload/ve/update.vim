@@ -56,7 +56,16 @@ endfunc
 func! ve#update#footer(id) abort
   let s:footer_text = []
   call add(s:footer_text, " ")
-  call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
+
+  if (g:ve_footer_style < 2)
+    call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
+  endif
+
+  if (g:ve_footer_style < 1)
+    let l:fmt = "Clear: Input(%s) | Name(%s) | Path(%s) | Ext(%s) | Filter(%s)"
+    call add(s:footer_text, printf(l:fmt, g:ve_clear_c, g:ve_clear_name, g:ve_clear_path, g:ve_clear_ext, g:ve_clear_filter))
+  endif
+
   call add(s:footer_text, "Num res: " . g:ve_total_r . " | Idx: " . a:id . " | Pag: " . g:ve_curr_pag . "/" . (ve#filter#total_pages() + 1))
   return s:footer_text
 endfunc

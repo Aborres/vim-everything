@@ -48,6 +48,7 @@ Variables ~
   |g:ve_keep_prev_search|
   |g:ve_use_python3|
   |g:ve_file_results|
+  |g:ve_footer_style|
 
   KeyBindings:~
   |g:ve_clear_c|
@@ -128,6 +129,12 @@ For Example:
 >
   f:texture.cpp \my_engine\
 <
+------------------------------------------------------------------------------
+                                                           *g:ve_footer_style*
+>
+  let g:ve_footer_style = 0
+<
+0: All, 1: Simplified, 2: Stats only
 ------------------------------------------------------------------------------
                                                                 *g:ve_clear_c*
 >

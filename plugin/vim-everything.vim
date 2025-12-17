@@ -4,6 +4,7 @@ let g:ve_resize = 1             "Toggles if the popup window should be resizeabl
 let g:ve_keep_prev_search = 1   "Forces VE to keep the input text in between searchs
 let g:ve_use_python3 = 1        "Set g:ve_use_python3 = 0 to use python27
 let g:ve_file_results = 1       "0: All, 1: Files, 2: Folders, can be overwritten using a:, f:, d: in the input field, this setting doesn't work with the rg fallback
+let g:ve_footer_style = 0       "0: All, 1: Simplified, 2: Stats only
 
 " VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
 " VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
