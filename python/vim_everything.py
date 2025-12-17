@@ -43,6 +43,24 @@ def __UpdateVimBuffers(names, paths, types):
   vim.command("let g:ve_r_types=%s"%types)
   vim.command("let g:ve_current_buff=%s"%out)
 
+def __VE_QueryType(text):
+
+  type = vim.vars["ve_file_results"]
+
+  filter = text[:2].lower()
+
+  if (filter == "a:"):
+      return text[2:], 0
+
+  if (filter == "f:"):
+      return text[2:], 1
+      
+  if (filter == "d:"):
+      return text[2:], 2
+
+  return text, type
+  
+
 def VE_Search(text, f, buff_size):
 
   text = text.replace("|", "") #remove cursor
@@ -57,7 +75,7 @@ def VE_Search(text, f, buff_size):
   else:
     e = Find()
 
-  type = vim.vars["ve_file_results"]
+  text, type = __VE_QueryType(text)
 
   if (not e.search(text, type, f, buff_size)):
     return 0

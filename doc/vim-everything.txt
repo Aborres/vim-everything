@@ -54,6 +54,7 @@ Variables ~
   |g:ve_clear_name|
   |g:ve_clear_path|
   |g:ve_clear_ext|
+  |g:ve_clear_filter|
 
   Icons:~
   |g:ve_cursor|
@@ -114,35 +115,54 @@ Set g:ve_use_python3 = 0 to use python27
 >
   let g:ve_file_results = 1
 <
-0: All, 1: Files, 2: Folders, this setting doesn't work with the rg fallback
+0: All, 1: Files, 2: Folders
+Can be overwritten using (a)all:, (f)iles:, (d)irectories: in the input field
+This option is case insensitive
+
+Default filters from Everything are also allowed: 
+https://www.voidtools.com/support/everything/searching/
+
+This setting doesn't work with the rg fallback
+
+For Example: 
+>
+  f:texture.cpp \my_engine\
+<
 ------------------------------------------------------------------------------
                                                                 *g:ve_clear_c*
 >
-  let g:ve_clear_c    = '$' 
+  let g:ve_clear_c = '$'
 <
 
 Key used to clear input search
 ------------------------------------------------------------------------------
                                                              *g:ve_clear_name*
 >
-  let g:ve_clear_name = '!' 
+  let g:ve_clear_name = '!'
 <
 
 Key used to clear name from the input search
 ------------------------------------------------------------------------------
                                                              *g:ve_clear_path*
 >
-  let g:ve_clear_path = '@' 
+  let g:ve_clear_path = '@'
 <
 
 Key used to clear path from the input search
 ------------------------------------------------------------------------------
                                                               *g:ve_clear_ext*
 >
-  let g:ve_clear_ext  = '#' 
+  let g:ve_clear_ext = '#'
 <
 
 Key used to clear ext from the input search
+------------------------------------------------------------------------------
+                                                           *g:ve_clear_filter*
+>
+  let g:ve_clear_filter = '%'
+<
+
+Key used to clear filter from the input search, See: *g:ve_file_results*
 ------------------------------------------------------------------------------
                                                                  *g:ve_cursor*
 >

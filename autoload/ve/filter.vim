@@ -192,7 +192,7 @@ func! s:FilterExt(id, key) abort
     let g:ve_search_txt = ve#filter#remove_cursor(g:ve_search_txt)
     let l:path_pos = ve#filter#split_name_path(g:ve_search_txt)
     if (l:path_pos > 0)
-      let l:new_text = l:new_text . " " . trim(g:ve_search_txt[l:path_pos - 1:])
+      let l:new_text = l:new_text . ' ' . trim(g:ve_search_txt[l:path_pos - 1:])
     endif 
 
     let g:ve_search_txt = l:new_text
@@ -201,6 +201,21 @@ func! s:FilterExt(id, key) abort
   endif
 
   return 1
+endfunc
+
+func! s:FilterFilter(id, key) abort
+
+  let l:text = ve#filter#remove_cursor(g:ve_search_txt)
+
+  if (l:text[1] == ':')
+    if ((l:text[0] == 'a') || (l:text[0] == 'f') || (l:text[0] == 'd'))
+      let g:ve_search_txt = g:ve_cursor . l:text[2:]
+      return ve#update#input_text(a:id)
+    endif
+  endif
+
+  return 1
+
 endfunc
 
 func! s:FilterInput_mode(id, key) abort
@@ -236,6 +251,10 @@ func! s:FilterInput_mode(id, key) abort
 
   if (a:key == g:ve_clear_ext)
     return s:FilterExt(a:id, a:key)
+  endif
+
+  if (a:key == g:ve_clear_filter)
+    return s:FilterFilter(a:id, a:key)
   endif
 
   if (a:key == g:ve_clear_path)
@@ -335,6 +354,11 @@ func! ve#filter#nav_mode(id, key) abort
   if (a:key == g:ve_clear_ext)
     call s:FromNavToInput(a:id, a:key)
     return s:FilterExt(a:id, a:key)
+  endif
+
+  if (a:key == g:ve_clear_filter)
+    call s:FromNavToInput(a:id, a:key)
+    return s:FilterFilter(a:id, a:key)
   endif
 
   if (a:key == g:ve_clear_path)
