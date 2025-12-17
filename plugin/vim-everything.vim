@@ -25,7 +25,8 @@ let g:ve_cursor = '|' "Cursor Icon
 let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰'] "Floating Window Borders
 
 let g:ve_fixed_w = 128 "if set to any value, the window will have that size
-let g:ve_use_alternative_search = 0 "If enabled will use ripgrep
+let g:ve_use_alternative_search = 0 "If enabled will use fallback search
+let g:ve_alternative_search_mode = 0 "0: fd, 1: rg
 let g:ve_switch_focus = 1 "Whether to switch to a buffer if the search file is already opened
 
 let g:ve_explore  = 'Explore '  "Default action when pressing Enter on a folder

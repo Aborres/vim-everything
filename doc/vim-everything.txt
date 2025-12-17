@@ -18,6 +18,7 @@ The plugin also supports a fallback to rg for platform that don't support
 Everything, the rg path can be enabled on Windows too, see:
 
                    |g:ve_use_alternative_search|
+                   |g:ve_alternative_search_mode|
 
 However, the default, maintained and recommended path is Everything.
 
@@ -64,6 +65,7 @@ Variables ~
   UI:~
   |g:ve_fixed_w|
   |g:ve_use_alternative_search|
+  |g:ve_alternative_search_mode|
   |g:ve_switch_focus|
 
   Functions:~
@@ -197,6 +199,12 @@ if set to any value, the window will have that size
 
 If enabled will use ripgrep, this is the default for all platforms that
 don't support Everything. 
+------------------------------------------------------------------------------
+                                                *g:ve_alternative_search_mode*
+>
+  let g:ve_alternative_search_mode = 0 "0: fd, 1: rg
+<
+0: fd, 1: rg
 ------------------------------------------------------------------------------
                                                            *g:ve_switch_focus*
 >

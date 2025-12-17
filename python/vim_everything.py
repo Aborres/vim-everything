@@ -1,7 +1,7 @@
 import sys
 
 windows = True
-if "win" in sys.platform.lower():
+if "win32" in sys.platform.lower():
   from everything import *
 else:
   from find import *
@@ -73,7 +73,9 @@ def VE_Search(text, f, buff_size):
   if (windows and not use_as):
     e = Everything()
   else:
+    search_mode = vim.vars["ve_alternative_search_mode"]
     e = Find()
+    e.setMode(search_mode)
 
   text, type = __VE_QueryType(text)
 
