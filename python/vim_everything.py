@@ -26,6 +26,8 @@ def __UpdateVimBuffers(names, paths, types):
 
   valid_ids += ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
 
+  enable_jump = vim.vars["ve_enable_number_jump"]
+
   for i in range(0, count):
     diff = curr - len(names[i])
     s = names[i]
@@ -34,7 +36,7 @@ def __UpdateVimBuffers(names, paths, types):
     s += " | "
     s += paths[i]
 
-    if (vim.vars["ve_enable_number_jump"]):
+    if (enable_jump and i < len(valid_ids)):
       s = f"{valid_ids[i]}: " + s
     out.append(s)
 

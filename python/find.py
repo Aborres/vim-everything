@@ -67,7 +67,7 @@ class Find:
     except:
      output = ""
 
-    self.filter(output, max)
+    self.filter(output, offset, max)
 
     return 1
 
@@ -134,7 +134,7 @@ class Find:
     text = "{} {}".format(cmd, args)
     return text
 
-  def filter(self, results, max):
+  def filter(self, results, offset, max):
 
     if (len(results) == 0):
       return
@@ -142,7 +142,10 @@ class Find:
     results = results.decode('utf-8').split("\n")
     self.query.total = len(results)
 
-    for i in range(0, self.query.total):
+    f = offset
+    t = min(f + max, self.query.total)
+
+    for i in range(f, t):
 
       r = results[i]
 
