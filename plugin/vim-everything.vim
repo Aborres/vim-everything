@@ -15,11 +15,12 @@ let g:ve_footer_style = 0       "0: All, 1: Simplified, 2: Stats only
 " use PopupSelected to change cursor color
 hi PopupSelected guifg=#000000 guibg=#ffa500
 
-let g:ve_clear_c       = '$' "Key used to clear input search
-let g:ve_clear_name    = '!' "Key used to clear name from the input search
-let g:ve_clear_path    = '@' "Key used to clear path from the input search
-let g:ve_clear_ext     = '#' "Key used to clear ext from the input search
-let g:ve_clear_filter  = '%' "Key used to clear filter from the input search
+let g:ve_clear_c           = '`' "Key used to clear input search
+let g:ve_clear_name        = '!' "Key used to clear name from the input search
+let g:ve_clear_path        = '@' "Key used to clear path from the input search
+let g:ve_clear_ext         = '#' "Key used to clear ext from the input search
+let g:ve_clear_filter      = '%' "Key used to clear filter from the input search
+let g:ve_clear_last_folder = ';' "Key used to clear last folder from the path in the input search
 
 let g:ve_cursor = '|' "Cursor Icon
 let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰'] "Floating Window Borders
@@ -40,6 +41,8 @@ let g:ve_hedit = 'split '  "Default action when pressing S on a file
 let g:ve_tedit = 'tabe '   "Default action when pressing T on a file
 
 let g:ve_last_search = ""
+
+let g:ve_callbacks = []
 
 func VE(keep_prev_search = 1)
 

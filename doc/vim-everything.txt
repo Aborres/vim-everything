@@ -57,6 +57,7 @@ Variables ~
   |g:ve_clear_path|
   |g:ve_clear_ext|
   |g:ve_clear_filter|
+  |g:ve_clear_last_folder|
 
   Icons:~
   |g:ve_cursor|
@@ -77,6 +78,10 @@ Variables ~
   |g:ve_vedit|
   |g:ve_hedit|
   |g:ve_tedit|
+
+  Helpers:~
+  |g:ve_last_search|
+  |g:ve_callbacks|
 
 ------------------------------------------------------------------------------
                                                                *g:ve_list_size*
@@ -173,6 +178,12 @@ Key used to clear ext from the input search
 
 Key used to clear filter from the input search, See: *g:ve_file_results*
 ------------------------------------------------------------------------------
+                                                      *g:ve_clear_last_folder*
+>
+  let g:ve_clear_last_folder = ';' 
+<
+Key used to clear last folder from the path in the input search
+------------------------------------------------------------------------------
                                                                  *g:ve_cursor*
 >
   let g:ve_cursor = '|' 
@@ -267,6 +278,33 @@ Default action when pressing S on a file
 <
 
 Default action when pressing T on a file
+------------------------------------------------------------------------------
+                                                            *g:ve_last_search*
+>
+  let g:ve_last_search = ""
+< 
+Can't be modified, will contain the string of the last search
+------------------------------------------------------------------------------
+                                                              *g:ve_callbacks*
+>
+  let g:ve_callbacks = []
+< 
+List of callbacks to inject extra functionality to vim-everything
+These callbacks are only called when navigating throught the list of results
+Each callback must be a list containing three elements:
+            ['binding', 'name', function('callback')]
+  Where:
+    'binding': key to trigger the callback
+    'name': name of the callback to display in the footer
+    'callback': callback to trigger on binding
+
+Signature: 
+            func! callback(id, file)
+            endfunc
+
+    Where:
+      'id': vim-everything's popup window
+      'file': highlighted file in the moment of the keybinding
 ------------------------------------------------------------------------------
 hi PopupSelected guifg=#000000 guibg=#ffa500
 

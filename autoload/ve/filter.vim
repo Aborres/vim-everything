@@ -68,6 +68,21 @@ func! ve#filter#call(id, key) abort
 
 endfunc
 
+func! s:GetCurrentlyFocusedFile()
+  let l:file_id = s:SelectedFileId()
+  return ve#callback#get_file_full_path(l:file_id)
+endfunc
+
+func! s:CursorEnd(id) abort
+  let g:ve_search_txt = ve#filter#remove_cursor(g:ve_search_txt) . g:ve_cursor
+  return ve#update#input_text(a:id)
+endfunc
+
+func! s:CursorFront(id) abort
+  let g:ve_search_txt = g:ve_cursor . ve#filter#remove_cursor(g:ve_search_txt)
+  return ve#update#input_text(a:id)
+endfunc
+
 func! s:FilterUp(id, key) abort
   if ((strlen(g:ve_search_txt) < 2) || (g:ve_search_txt[0] == g:ve_cursor))
     return 1
@@ -218,7 +233,47 @@ func! s:FilterFilter(id, key) abort
 
 endfunc
 
+func! s:FilterLastFolder(id, key) abort
+
+  let l:text = ve#filter#remove_cursor(g:ve_search_txt)
+  let l:pos  = ve#filter#split_name_path(l:text)
+
+  if (l:pos > -1) 
+
+    let l:name = ""
+    let l:path = l:text
+
+    " Avoid separators ending in the name
+    if (l:pos > 0)
+      let l:split = max([0, l:pos - 1])
+      let l:name = l:text[:l:split]
+      let l:path = trim(l:text[l:split:])
+    endif
+
+    let l:path = fnamemodify(l:path, ':h')
+
+    let g:ve_search_txt = l:name . l:path . g:ve_cursor
+
+    return ve#update#input_text(a:id)
+  endif
+
+  return 1
+endfunc
+
+func! ve#filter#close(id) abort
+  call popup_close(a:id, [-1, -1])
+  return 1
+endfunc
+
 func! s:FilterInput_mode(id, key) abort
+
+  if (a:key == '$')
+    return s:CursorEnd(a:id)
+  endif
+
+  if (a:key == '^')
+    return s:CursorFront(a:id)
+  endif
 
   if (a:key == "\<Up>" || a:key == "\<Home>")
     return s:FilterUp(a:id, a:key)
@@ -249,6 +304,10 @@ func! s:FilterInput_mode(id, key) abort
     return ve#filter#clear_name(a:id, a:key)
   endif
 
+  if (a:key == g:ve_clear_path)
+    return ve#filter#clear_path(a:id, a:key)
+  endif
+
   if (a:key == g:ve_clear_ext)
     return s:FilterExt(a:id, a:key)
   endif
@@ -257,8 +316,8 @@ func! s:FilterInput_mode(id, key) abort
     return s:FilterFilter(a:id, a:key)
   endif
 
-  if (a:key == g:ve_clear_path)
-    return ve#filter#clear_path(a:id, a:key)
+  if (a:key == g:ve_clear_last_folder)
+    return s:FilterLastFolder(a:id, a:key)
   endif
 
   if (a:key == "\<Del>")
@@ -271,8 +330,7 @@ func! s:FilterInput_mode(id, key) abort
   endif
 
   if (a:key == "\<Esc>")
-    call popup_close(a:id, [-1, -1])
-    return 1
+    return ve#filter#close(a:id)
   endif
 
   if (a:key >= ' ' && a:key <= '~')
@@ -282,8 +340,12 @@ func! s:FilterInput_mode(id, key) abort
   return popup_filter_menu(a:id, a:key)
 endfunc
 
+func! s:SelectedFileId() abort
+  return g:ve_screen_space_idx - g:ve_top_offset
+endfunc
+
 func! s:FilterCloseWidth(id, mode) abort
-  call popup_close(a:id, [g:ve_screen_space_idx - g:ve_top_offset, a:mode])
+  call popup_close(a:id, [s:SelectedFileId(), a:mode])
   return 1
 endfunc
 
@@ -383,6 +445,14 @@ func! ve#filter#nav_mode(id, key) abort
       endif
     endfor
   endif
+
+  for l:c in g:ve_callbacks
+    if ((a:key == l:c[0]) && g:ve_num_r)
+      let l:file = s:GetCurrentlyFocusedFile()
+      let l:Ptr = l:c[2]
+      return l:Ptr(a:id, l:file)
+    endif
+  endfor
 
   return popup_filter_menu(a:id, a:key)
 endfunc

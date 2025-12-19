@@ -61,6 +61,16 @@ func! ve#update#footer(id) abort
     call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
   endif
 
+  if (g:ve_footer_style == 0)
+    if (len(g:ve_callbacks))
+      let l:text = ""
+      for l:c in g:ve_callbacks
+        let l:text = l:text . printf("%s(%s)", l:c[1], l:c[0])
+      endfor
+      call add(s:footer_text, l:text)
+    endif
+  endif
+
   if (g:ve_footer_style < 1)
     let l:fmt = "Clear: Input(%s) | Name(%s) | Path(%s) | Ext(%s) | Filter(%s)"
     call add(s:footer_text, printf(l:fmt, g:ve_clear_c, g:ve_clear_name, g:ve_clear_path, g:ve_clear_ext, g:ve_clear_filter))

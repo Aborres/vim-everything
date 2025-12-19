@@ -1,5 +1,15 @@
 
-func! s:GetFileFullPath(r) abort
+func! ve#callback#add_callback(c) abort
+  if (len(a:c) < 3)
+    echo("Couldn't register Ill formed callback") 
+    return
+  endif
+
+  call add(g:ve_callbacks, a:c)
+
+endfunc
+
+func! ve#callback#get_file_full_path(r) abort
   return g:ve_r_paths[a:r] . "/" . g:ve_r_names[a:r]
 endfunc
 
@@ -39,7 +49,7 @@ func! ve#callback#call(id, result) abort
 
     if (g:ve_switch_focus)
 
-      let l:full_path = l:is_folder ? l:path : s:GetFileFullPath(l:r)
+      let l:full_path = l:is_folder ? l:path : ve#callback#get_file_full_path(l:r)
 
       let l:buffer = s:IsFileAlreadyOpened(l:full_path)
       if (l:buffer > -1)
@@ -50,14 +60,17 @@ func! ve#callback#call(id, result) abort
     endif
 
     if (!l:is_folder)
+
+      let l:full_path = ve#callback#get_file_full_path(l:r)
+
       if (l:m == g:ve_open_enter)
-          execute g:ve_edit . s:GetFileFullPath(l:r)
+          execute g:ve_edit . l:full_path
       elseif (l:m == g:ve_open_vs)
-          execute g:ve_vedit . s:GetFileFullPath(l:r) 
+          execute g:ve_vedit . l:full_path 
       elseif (l:m == g:ve_open_sp)
-          execute g:ve_hedit . s:GetFileFullPath(l:r)
+          execute g:ve_hedit . l:full_path
       elseif (l:m == g:ve_open_tab)
-          execute g:ve_tedit . s:GetFileFullPath(l:r)
+          execute g:ve_tedit . l:full_path
       else 
         echo "VE: Undefined mode to open file"
       endif
