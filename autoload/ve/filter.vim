@@ -438,7 +438,7 @@ func! ve#filter#nav_mode(id, key) abort
     let l:valid_keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
     let l:valid_ids = l:valid_num + l:valid_keys
 
-    for i in range(1, ve#filter#list_size() - 1) 
+    for i in range(1, g:ve_num_r - 1) 
       if (a:key == l:valid_ids[i])
         call ve#jump#to_element(a:id, i + g:ve_top_offset)
         return s:FilterCloseWidth(a:id, g:ve_open_enter)

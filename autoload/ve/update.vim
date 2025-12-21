@@ -65,7 +65,7 @@ func! ve#update#footer(id) abort
     if (len(g:ve_callbacks))
       let l:text = ""
       for l:c in g:ve_callbacks
-        let l:text = l:text . printf("%s(%s)", l:c[1], l:c[0])
+        let l:text = l:text . printf("%s(%s) ", l:c[1], l:c[0])
       endfor
       call add(s:footer_text, l:text)
     endif
