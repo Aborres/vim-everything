@@ -1,7 +1,7 @@
 
 func! ve#filter#list_size() abort
   if g:ve_enable_number_jump 
-    return min([20, g:ve_list_size])
+    return min([len(g:ve_jump_shortcuts), g:ve_list_size])
   endif
   return g:ve_list_size
 endfunc
@@ -357,7 +357,10 @@ endfunc
 func! ve#filter#nav_mode(id, key) abort
 
   if (a:key == "\<CR>") "Enter
-    return s:FilterCloseWidth(a:id, g:ve_open_enter)
+    if (g:ve_num_r)
+      return s:FilterCloseWidth(a:id, g:ve_open_enter)
+    endif
+    return 1 " Avoid window closure if there are no files
   endif
 
   if (a:key == "V")
@@ -430,16 +433,11 @@ func! ve#filter#nav_mode(id, key) abort
 
   if (g:ve_enable_number_jump)
 
-    let l:valid_num = []
-    for i in range(0, 9)
-      call add(l:valid_num, string(i))
-    endfor
+    let l:num_shortcuts = len(g:ve_jump_shortcuts)
+    let l:jump_range = min([g:ve_num_r - 1, l:num_shortcuts - 1]) " Ranges are [] so need to remove one here
 
-    let l:valid_keys = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
-    let l:valid_ids = l:valid_num + l:valid_keys
-
-    for i in range(1, g:ve_num_r - 1) 
-      if (a:key == l:valid_ids[i])
+    for i in range(0, l:jump_range) 
+      if (a:key == g:ve_jump_shortcuts[i])
         call ve#jump#to_element(a:id, i + g:ve_top_offset)
         return s:FilterCloseWidth(a:id, g:ve_open_enter)
       endif

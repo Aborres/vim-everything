@@ -45,6 +45,7 @@ Variables ~
   Globals:~
   |g:ve_list_size| 
   |g:ve_enable_number_jump|
+  |g:ve_jump_shortcuts|
   |g:ve_resize|
   |g:ve_keep_prev_search|
   |g:ve_use_python3|
@@ -96,7 +97,14 @@ Changes the minimum number of elements to show in searches
   let g:ve_enable_number_jump = 1
 <
 
-If enabled limits g:ve_list_size to 20
+If enabled limits g:ve_list_size to len(g:ve_jump_shortcuts)
+------------------------------------------------------------------------------
+                                                         *g:ve_jump_shortcuts*
+>
+  let g:ve_jump_shortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+                             'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
+<
+Shortcut keys to use for quick open from the list of items
 ------------------------------------------------------------------------------
                                                                  *g:ve_resize*
 >

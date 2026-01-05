@@ -20,13 +20,8 @@ def __UpdateVimBuffers(names, paths, types):
   for i in range(0, count):
     curr = max(len(names[i]), curr)
 
-  valid_ids = []
-  for i in range(0, 10):
-    valid_ids.append(i)
-
-  valid_ids += ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
-
   enable_jump = vim.vars["ve_enable_number_jump"]
+  valid_ids = vim.eval("g:ve_jump_shortcuts")
 
   for i in range(0, count):
     diff = curr - len(names[i])
