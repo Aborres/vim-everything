@@ -77,3 +77,71 @@ func! ve#plugin#search_w(text, from) abort
 
   return g:ve_status
 endfunc
+
+func ve#plugin#ve(keep_prev_search = 1)
+
+  if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
+    let g:ve_search_txt = ""
+  endif
+
+  call ve#plugin#search(g:ve_search_txt)
+
+endfunc
+
+func! ve#plugin#search(txt) abort
+
+  call ve#plugin#init()
+
+  call ve#plugin#reset()
+
+  " If we are searching with a path insert the cursor at the front to start writing there
+  " Otherwise it might be an already formed query
+  let l:search_text = a:txt
+  if ((l:search_text[0] == "\\") || (l:search_text[0] == "/"))
+    let l:search_text = g:ve_cursor . " " . trim(ve#filter#remove_cursor(l:search_text))
+  endif
+
+  if (!ve#plugin#search_w(l:search_text, 0))
+    return 0
+  endif
+  
+  let l:ve_args = #{
+  	  \ title:'vim-Everything',
+          \ filter: 've#filter#call',
+          \ callback: 've#callback#call',
+          \ resize: 'g:ve_resize',
+          \ highlight: 'g:ve_style',
+          \ borderchars: g:ve_borders,
+          \ wrap: 0,
+          \ scrollbar: 1,
+          \ close: 'click'
+        \}
+
+  if (g:ve_fixed_w)
+    let l:ve_args.minwidth = g:ve_fixed_w
+    let l:ve_args.maxwidth = g:ve_fixed_w
+  endif
+
+  call popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
+endfunc
+
+func! ve#plugin#search_in_path(path) abort
+
+  let l:txt = a:path
+  let l:pos = ve#filter#split_name_path(l:txt)
+
+  if (l:pos > 0)
+    let l:txt = l:txt[l:pos:]
+  endif
+
+  if (g:ve_keep_prev_search)
+    let l:last_search = ve#filter#remove_cursor(g:ve_last_search)
+    let l:file_name   = ve#filter#clear_path_w(l:last_search)
+    if (l:file_name != g:ve_last_search)
+      let l:txt = trim(l:file_name) . g:ve_cursor . ' ' . l:txt
+    endif
+  endif
+  
+  call ve#plugin#search(l:txt)
+
+endfunc
