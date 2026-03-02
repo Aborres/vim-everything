@@ -94,7 +94,8 @@ endfunc
 
 func! VE_SearchInPath(path) abort
 
-  let l:txt = a:path
+  let l:txt = ve#plugin#check_sep_terminated(a:path)
+
   let l:pos = ve#filter#split_name_path(l:txt)
 
   if (l:pos > 0)

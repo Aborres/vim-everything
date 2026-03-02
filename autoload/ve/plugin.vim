@@ -77,3 +77,18 @@ func! ve#plugin#search_w(text, from) abort
 
   return g:ve_status
 endfunc
+
+func! ve#plugin#check_sep_terminated(path)
+
+  let l:len = len(a:path)
+  if (l:len > 0)
+    let l:end = a:path[l:len - 1]
+    let l:term = l:end == '/' || l:end == '\'
+    if (!l:term)
+      return a:path . '\'
+    endif
+  endif
+
+  return a:path
+endfunc
+
