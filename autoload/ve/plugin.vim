@@ -1,5 +1,4 @@
 let g:ve_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h') . '/../..'
-let s:ve_initialized = 0 
 
 "Constants
 let g:ve_open_enter = 0
@@ -27,6 +26,9 @@ let g:ve_top_offset       = 2
 let g:ve_bottom_offset    = 4
 "--UI
 
+let s:ve_initialized = 0 
+let s:ve_popup = 0
+
 func! ve#plugin#reset() abort
 
   "Python
@@ -43,6 +45,10 @@ func! ve#plugin#reset() abort
 
   let g:ve_screen_space_idx = 0
   let g:ve_curr_pag         = 0
+
+  let s:ve_popup = 0
+
+  call ve#plugin#init()
 
 endfunc
 
@@ -90,8 +96,6 @@ endfunc
 
 func! ve#plugin#search(txt) abort
 
-  call ve#plugin#init()
-
   call ve#plugin#reset()
 
   " If we are searching with a path insert the cursor at the front to start writing there
@@ -122,7 +126,7 @@ func! ve#plugin#search(txt) abort
     let l:ve_args.maxwidth = g:ve_fixed_w
   endif
 
-  call popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
+  let s:ve_popup = popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
 endfunc
 
 func! ve#plugin#search_in_path(path) abort
@@ -143,5 +147,20 @@ func! ve#plugin#search_in_path(path) abort
   endif
   
   call ve#plugin#search(l:txt)
+
+endfunc
+
+func! ve#plugin#refresh(id = 0) abort
+
+  if (!ve#plugin#search_w(g:ve_search_txt, 0))
+    return 0
+  endif
+
+  let l:id = a:id
+  if (!l:id)
+    let l:id = s:ve_popup
+  endif
+
+  call popup_settext(l:id, ve#update#screen_text(g:ve_search_txt, 0))
 
 endfunc

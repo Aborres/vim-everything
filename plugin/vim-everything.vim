@@ -60,3 +60,7 @@ endfunc
 func! VE_Path() abort
   call VE_SearchInPath(g:ve_search_txt)
 endfunc
+
+func! VE_Refresh() abort
+  call ve#plugin#refresh()
+endfunc
