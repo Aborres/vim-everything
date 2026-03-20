@@ -131,7 +131,7 @@ endfunc
 
 func! ve#plugin#search_in_path(path) abort
 
-  let l:txt = a:path
+  let l:txt = ve#plugin#check_sep_terminated(a:path)
   let l:pos = ve#filter#split_name_path(l:txt)
 
   if (l:pos > 0)
@@ -163,4 +163,18 @@ func! ve#plugin#refresh(id = 0) abort
 
   call popup_settext(l:id, ve#update#screen_text(g:ve_search_txt, 0))
 
+endfunc
+
+func! ve#plugin#check_sep_terminated(path)
+
+  let l:len = len(a:path)
+  if (l:len > 0)
+    let l:end = a:path[l:len - 1]
+    let l:term = l:end == '/' || l:end == '\'
+    if (!l:term)
+      return a:path . '\'
+    endif
+  endif
+
+  return a:path
 endfunc
