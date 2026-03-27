@@ -53,6 +53,11 @@ func! VE_Search(txt) abort
   call ve#plugin#search(a:txt)
 endfunc
 
+" Only supports g:ve_keep_prev_search if file is ''
+func! VE_SearchFileInPath(file, path) abort
+  call ve#plugin#search_text_in_path(a:file, a:path)
+endfunc
+
 func! VE_SearchInPath(path) abort
   call ve#plugin#search_in_path(a:path)
 endfunc

@@ -34,9 +34,10 @@ editing your query faster.
 Usage ~
 
 VE(keep_prev_search = 1)
-VE_Path()               
-VE_SearchInPath(path)   
-VE_Search(txt)          
+VE_Path()
+VE_SearchFileInPath(file, path)
+VE_SearchInPath(path)
+VE_Search(txt)
 
 ===============================================================================
                                                      *vim-everything-variables*

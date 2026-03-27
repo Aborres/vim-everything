@@ -129,7 +129,20 @@ func! ve#plugin#search(txt) abort
   let s:ve_popup = popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
 endfunc
 
-func! ve#plugin#search_in_path(path) abort
+func! s:VEQueryFromPrevSearch(path)
+
+  if (g:ve_keep_prev_search)
+    let l:last_search = ve#filter#remove_cursor(g:ve_last_search)
+    let l:file_name   = ve#filter#clear_path_w(l:last_search)
+    if (l:file_name != g:ve_last_search)
+      return trim(l:file_name) . g:ve_cursor . ' ' . a:path
+    endif
+  endif
+
+  return a:path
+endfunc
+
+func! s:VECleanPathForSearch(path)
 
   let l:txt = ve#plugin#check_sep_terminated(a:path)
   let l:pos = ve#filter#split_name_path(l:txt)
@@ -138,14 +151,28 @@ func! ve#plugin#search_in_path(path) abort
     let l:txt = l:txt[l:pos:]
   endif
 
-  if (g:ve_keep_prev_search)
-    let l:last_search = ve#filter#remove_cursor(g:ve_last_search)
-    let l:file_name   = ve#filter#clear_path_w(l:last_search)
-    if (l:file_name != g:ve_last_search)
-      let l:txt = trim(l:file_name) . g:ve_cursor . ' ' . l:txt
-    endif
+  return l:txt
+endfunc
+
+func! ve#plugin#search_in_path(path) abort
+
+  let l:txt = s:VECleanPathForSearch(a:path)
+  let l:txt = s:VEQueryFromPrevSearch(l:txt)
+
+  call ve#plugin#search(l:txt)
+
+endfunc
+
+func! ve#plugin#search_text_in_path(file, path) abort
+
+  if (a:file == '')
+    call ve#plugin#search_in_path(a:path)
+    return
   endif
-  
+
+  let l:txt = s:VECleanPathForSearch(a:path)
+  let l:txt = trim(a:file) . g:ve_cursor . ' ' . l:txt
+
   call ve#plugin#search(l:txt)
 
 endfunc
