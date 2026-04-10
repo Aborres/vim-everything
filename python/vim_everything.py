@@ -24,10 +24,13 @@ def __UpdateVimBuffers(names, paths, types):
   valid_ids = vim.eval("g:ve_jump_shortcuts")
 
   for i in range(0, count):
+
     diff = curr - len(names[i])
+
     s = names[i]
     for j in range(0, diff):
       s += " "
+
     s += " | "
     s += paths[i]
 
@@ -60,7 +63,6 @@ def __VE_QueryType(text):
 
 def VE_Search(text, f, buff_size):
 
-  text = text.replace("|", "") #remove cursor
   text = text.replace("/", "\\") #standard any separator so Everything is happy
   text = text.replace("\\\\", "\\")
 

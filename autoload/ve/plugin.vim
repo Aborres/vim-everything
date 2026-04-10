@@ -20,6 +20,7 @@ let g:ve_current_buff = []
 let g:ve_current_mode = g:ve_input_mode
 
 let g:ve_search_txt = g:ve_cursor
+let g:ve_py_search_txt = g:ve_cursor
 
 "UI
 let g:ve_top_offset       = 2
@@ -48,6 +49,8 @@ func! ve#plugin#reset() abort
 
   let s:ve_popup = 0
 
+  let g:ve_py_search_txt = g:ve_cursor
+
   call ve#plugin#init()
 
 endfunc
@@ -71,6 +74,8 @@ func! ve#plugin#search_w(text, from) abort
 
   let g:ve_search_txt = a:text
   let g:ve_last_search = g:ve_search_txt
+
+  let g:ve_py_search_txt = ve#filter#remove_cursor(g:ve_search_txt)
 
   let g:ve_offset_txt = a:from 
   let g:ve_status = 1

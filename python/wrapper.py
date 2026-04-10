@@ -9,7 +9,8 @@ sys.path.insert(0, python_root_dir)
 from vim_everything import *
 
 def VE_SearchWrapper():
-    text = vim.eval('g:ve_search_txt')
+
+    text = vim.eval('g:ve_py_search_txt')
     f = int(vim.eval('g:ve_offset_txt'))
     max = int(vim.eval('g:ve_list_size'))
 

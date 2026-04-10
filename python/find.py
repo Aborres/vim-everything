@@ -128,7 +128,7 @@ class Find:
     return name, path
   
   def normalize(self, text):
-    return text.replace("\\", "/").replace("|", "")
+    return text.replace("\\", "/")
 
   def printQuery(self, cmd, args):
     text = "{} {}".format(cmd, args)
