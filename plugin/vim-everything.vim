@@ -45,6 +45,8 @@ let g:ve_last_search = ""
 
 let g:ve_callbacks = []
 
+let g:ve_internal_cursor = '?'
+
 func VE(keep_prev_search = 1)
   call ve#plugin#ve(a:keep_prev_search)
 endfunc

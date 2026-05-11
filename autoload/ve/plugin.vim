@@ -19,12 +19,12 @@ let g:ve_curr_pag         = 0
 let g:ve_current_buff = []
 let g:ve_current_mode = g:ve_input_mode
 
-let g:ve_search_txt = g:ve_cursor
-let g:ve_py_search_txt = g:ve_cursor
+let g:ve_search_txt = g:ve_internal_cursor
+let g:ve_py_search_txt = g:ve_internal_cursor
 
 "UI
-let g:ve_top_offset       = 2
-let g:ve_bottom_offset    = 4
+let g:ve_top_offset    = 2
+let g:ve_bottom_offset = 4
 "--UI
 
 let s:ve_initialized = 0 
@@ -49,7 +49,8 @@ func! ve#plugin#reset() abort
 
   let s:ve_popup = 0
 
-  let g:ve_py_search_txt = g:ve_cursor
+  let g:ve_search_txt = g:ve_internal_cursor
+  let g:ve_py_search_txt = g:ve_internal_cursor
 
   call ve#plugin#init()
 
@@ -75,7 +76,7 @@ func! ve#plugin#search_w(text, from) abort
   let g:ve_search_txt = a:text
   let g:ve_last_search = g:ve_search_txt
 
-  let g:ve_py_search_txt = ve#filter#remove_cursor(g:ve_search_txt)
+  let g:ve_py_search_txt = ve#cursor#remove_cursor(g:ve_search_txt)
 
   let g:ve_offset_txt = a:from 
   let g:ve_status = 1
@@ -89,7 +90,7 @@ func! ve#plugin#search_w(text, from) abort
   return g:ve_status
 endfunc
 
-func ve#plugin#ve(keep_prev_search = 1)
+func ve#plugin#ve(keep_prev_search = 1) abort
 
   if ((a:keep_prev_search != 1) || (g:ve_keep_prev_search != 1))
     let g:ve_search_txt = ""
@@ -107,7 +108,8 @@ func! ve#plugin#search(txt) abort
   " Otherwise it might be an already formed query
   let l:search_text = a:txt
   if ((l:search_text[0] == "\\") || (l:search_text[0] == "/"))
-    let l:search_text = g:ve_cursor . " " . trim(ve#filter#remove_cursor(l:search_text))
+    let l:search_text = ve#cursor#move_front(l:search_text)
+  else
   endif
 
   if (!ve#plugin#search_w(l:search_text, 0))
@@ -134,20 +136,20 @@ func! ve#plugin#search(txt) abort
   let s:ve_popup = popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
 endfunc
 
-func! s:VEQueryFromPrevSearch(path)
+func! s:VEQueryFromPrevSearch(path) abort
 
   if (g:ve_keep_prev_search)
-    let l:last_search = ve#filter#remove_cursor(g:ve_last_search)
+    let l:last_search = ve#cursor#remove_cursor(g:ve_last_search)
     let l:file_name   = ve#filter#clear_path_w(l:last_search)
     if (l:file_name != g:ve_last_search)
-      return trim(l:file_name) . g:ve_cursor . ' ' . a:path
+      return ve#cursor#move_after(l:file_name, a:path)
     endif
   endif
 
   return a:path
 endfunc
 
-func! s:VECleanPathForSearch(path)
+func! s:VECleanPathForSearch(path) abort
 
   let l:txt = ve#plugin#check_sep_terminated(a:path)
   let l:pos = ve#filter#split_name_path(l:txt)
@@ -176,7 +178,7 @@ func! ve#plugin#search_text_in_path(file, path) abort
   endif
 
   let l:txt = s:VECleanPathForSearch(a:path)
-  let l:txt = trim(a:file) . g:ve_cursor . ' ' . l:txt
+  let l:txt = ve#cursor#move_after(a:file, l:txt)
 
   call ve#plugin#search(l:txt)
 
@@ -197,7 +199,7 @@ func! ve#plugin#refresh(id = 0) abort
 
 endfunc
 
-func! ve#plugin#check_sep_terminated(path)
+func! ve#plugin#check_sep_terminated(path) abort
 
   let l:len = len(a:path)
   if (l:len > 0)

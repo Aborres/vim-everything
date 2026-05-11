@@ -45,10 +45,14 @@ func! ve#update#up(id) abort
   return 1
 endfunc
 
+func! ve#update#remove_internal_cursor(text) abort
+  return substitute(a:text, g:ve_internal_cursor, g:ve_cursor, '')
+endfunc
+
 "These functions update the text in the buffers
 func! ve#update#header(text) abort
   let s:header_text = []
-  call add(s:header_text, "VE: " . a:text)
+  call add(s:header_text, "VE: " . ve#update#remove_internal_cursor(a:text))
   call add(s:header_text, "")
   return s:header_text
 endfunc
@@ -89,9 +93,12 @@ func! ve#update#to_list(id) abort
 endfunc
 
 func! ve#update#screen_body(id) abort
-  call popup_settext(a:id, ve#update#screen_text(g:ve_search_txt, ve#update#to_list(g:ve_screen_space_idx)))
+  let l:list = ve#update#to_list(g:ve_screen_space_idx)
+  let l:text = ve#update#screen_text(g:ve_search_txt, list)
+  call popup_settext(a:id, l:text)
 endfunc
 
 func! ve#update#screen_footer(id, txt) abort
-  call popup_settext(a:id, ve#update#screen_text(g:ve_search_txt, a:txt))
+  let l:text = ve#update#screen_text(g:ve_search_txt, a:txt)
+  call popup_settext(a:id, l:text)
 endfunc
