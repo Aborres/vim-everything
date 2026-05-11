@@ -254,8 +254,7 @@ func! s:FilterLastFolder(id, key) abort
 endfunc
 
 func! ve#filter#close(id) abort
-  call popup_close(a:id, [-1, -1])
-  return 1
+  return ve#plugin#close(a:id)
 endfunc
 
 func! s:FilterInput(id, key) abort

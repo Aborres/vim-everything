@@ -30,6 +30,9 @@ let g:ve_bottom_offset = 4
 let s:ve_initialized = 0 
 let s:ve_popup = 0
 
+let s:ve_timer = -1
+let s:ve_cursor_state = 1
+
 func! ve#plugin#reset() abort
 
   "Python
@@ -53,6 +56,8 @@ func! ve#plugin#reset() abort
   let g:ve_py_search_txt = g:ve_internal_cursor
 
   call ve#plugin#init()
+
+  let s:ve_timer = -1
 
 endfunc
 
@@ -100,6 +105,11 @@ func ve#plugin#ve(keep_prev_search = 1) abort
 
 endfunc
 
+func! s:Blink(timer) abort
+  let s:ve_cursor_state = !s:ve_cursor_state
+  call ve#update#screen_body(s:ve_popup, s:ve_cursor_state)
+endfunc
+
 func! ve#plugin#search(txt) abort
 
   call ve#plugin#reset()
@@ -134,6 +144,21 @@ func! ve#plugin#search(txt) abort
   endif
 
   let s:ve_popup = popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
+  if (g:ve_cursor_blink)
+    let s:ve_cursor_state = 1
+    let s:ve_timer = timer_start(g:ve_cursor_blink_speed, function('s:Blink'), {'repeat': -1}) 
+  endif
+endfunc
+
+func! ve#plugin#close(id) abort
+
+  call popup_close(a:id, [-1, -1])
+
+  if (g:ve_cursor_blink && (s:ve_timer > -1))
+    call timer_stop(s:ve_timer)
+    let s:ve_timer = -1
+  endif
+  return 1
 endfunc
 
 func! s:VEQueryFromPrevSearch(path) abort

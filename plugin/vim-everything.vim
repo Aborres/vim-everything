@@ -41,6 +41,9 @@ let g:ve_vedit = 'vsplit ' "Default action when pressing V on a file
 let g:ve_hedit = 'split '  "Default action when pressing S on a file
 let g:ve_tedit = 'tabe '   "Default action when pressing T on a file
 
+let g:ve_cursor_blink = 1
+let g:ve_cursor_blink_speed = 500 "ms
+
 let g:ve_last_search = ""
 
 let g:ve_callbacks = []
