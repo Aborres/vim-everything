@@ -1,7 +1,7 @@
 
 func! ve#callback#add_callback(c) abort
   if (len(a:c) < 3)
-    echo("Couldn't register Ill formed callback") 
+    call ve#plugin#log("Couldn't register Ill formed callback") 
     return
   endif
 
@@ -72,7 +72,7 @@ func! ve#callback#call(id, result) abort
       elseif (l:m == g:ve_open_tab)
           execute g:ve_tedit . l:full_path
       else 
-        echo "VE: Undefined mode to open file"
+        call ve#plugin#log("Undefined mode to open file")
       endif
     else
       if (l:m == g:ve_open_enter)
@@ -84,7 +84,7 @@ func! ve#callback#call(id, result) abort
       elseif (l:m == g:ve_open_tab)
           execute g:ve_texplore . l:path
       else 
-        echo "VE: Undefined mode to open folder"
+        call ve#plugin#log("Undefined mode to open folder")
       endif
     endif
   endif

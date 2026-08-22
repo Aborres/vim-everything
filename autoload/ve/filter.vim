@@ -82,7 +82,7 @@ func! ve#filter#call(id, key) abort
   elseif (g:ve_current_mode == g:ve_nav_mode)
     return ve#filter#nav_mode(a:id, a:key)
   else
-    echo "VE: Undefined filter mode"
+    call ve#plugin#log('Undefined filter mode')
   endif
 
   " Shouldn't ever happen
@@ -95,8 +95,8 @@ func! s:SelectedFileId() abort
 endfunc
 
 func! s:FilterCloseWidth(id, mode) abort
-  call popup_close(a:id, [s:SelectedFileId(), a:mode])
-  return 1
+  call ve#callback#call(a:id, [s:SelectedFileId(), a:mode])
+  return ve#plugin#close(a:id)
 endfunc
 
 func! s:GetCurrentlyFocusedFile()

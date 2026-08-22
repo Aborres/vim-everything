@@ -1,13 +1,13 @@
 let g:ve_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h') . '/../..'
 
 "Constants
-let g:ve_open_enter = 0
-let g:ve_open_vs    = 1
-let g:ve_open_sp    = 2
-let g:ve_open_tab   = 3
+const g:ve_open_enter = 0
+const g:ve_open_vs    = 1
+const g:ve_open_sp    = 2
+const g:ve_open_tab   = 3
 
-let g:ve_input_mode   = 0
-let g:ve_nav_mode     = 1
+const g:ve_input_mode   = 0
+const g:ve_nav_mode     = 1
 "--Constants
 
 let g:ve_status = 1
@@ -19,7 +19,6 @@ let g:ve_curr_pag         = 0
 let g:ve_current_buff = []
 let g:ve_current_mode = g:ve_input_mode
 
-let g:ve_search_txt = g:ve_internal_cursor
 let g:ve_py_search_txt = g:ve_internal_cursor
 
 "UI
@@ -28,10 +27,12 @@ let g:ve_bottom_offset = 4
 "--UI
 
 let s:ve_initialized = 0 
-let s:ve_popup = 0
+let s:ve_popup = -1
 
 let s:ve_timer = -1
 let s:ve_cursor_state = 1
+
+let s:ve_active_backend = {}
 
 func! ve#plugin#reset() abort
 
@@ -50,30 +51,41 @@ func! ve#plugin#reset() abort
   let g:ve_screen_space_idx = 0
   let g:ve_curr_pag         = 0
 
-  let s:ve_popup = 0
-
   let g:ve_search_txt = g:ve_internal_cursor
   let g:ve_py_search_txt = g:ve_internal_cursor
 
-  call ve#plugin#init()
-
   let s:ve_timer = -1
+
+  if (ve#plugin#init())
+    return g:ve_backend.reset()
+  endif
+
+  return 0
 
 endfunc
 
 func! ve#plugin#init() abort
+
   if (s:ve_initialized == 0)
 
-    let l:wrapper_file = escape(g:ve_root_dir, ' ') . '/python/wrapper.py'
-
-    if (g:ve_use_python3 == 1)
-      exe 'py3file ' . l:wrapper_file
-    else
-      exe 'pyfile ' . l:wrapper_file
+    if (!has('popupwin'))
+      call ve#plugin#log('Unssupported version of vim, vim must be compiled with popupwin, check version')
+      return 0
     endif
 
-    let s:ve_initialized = 1
+    const l:keys = ['name', 'platform', 'init', 'search', 'reset']
+    for l:key in l:keys
+      if (!has_key(g:ve_backend, l:key))
+        call ve#plugin#log("Illformed backend, missing key, required keys are: " . string(l:keys))
+        return 0
+      endif
+    endfor
+
+    let s:ve_initialized = g:ve_backend.init()
+
   endif
+
+  return s:ve_initialized
 endfunc
 
 func! ve#plugin#search_w(text, from) abort
@@ -86,11 +98,7 @@ func! ve#plugin#search_w(text, from) abort
   let g:ve_offset_txt = a:from 
   let g:ve_status = 1
 
-  if (g:ve_use_python3 == 1)
-    python3 VE_SearchWrapper()
-  else
-    python VE_SearchWrapper()
-  endif
+  call g:ve_backend.search()
 
   return g:ve_status
 endfunc
@@ -112,7 +120,10 @@ endfunc
 
 func! ve#plugin#search(txt) abort
 
-  call ve#plugin#reset()
+  if (!ve#plugin#reset())
+    call ve#plugin#log('Failed to initialize plugin')
+    return 0
+  endif
 
   " If we are searching with a path insert the cursor at the front to start writing there
   " Otherwise it might be an already formed query
@@ -125,39 +136,60 @@ func! ve#plugin#search(txt) abort
   if (!ve#plugin#search_w(l:search_text, 0))
     return 0
   endif
-  
-  let l:ve_args = #{
-  	  \ title:'vim-Everything',
-          \ filter: 've#filter#call',
-          \ callback: 've#callback#call',
-          \ resize: 'g:ve_resize',
-          \ highlight: 'g:ve_style',
-          \ borderchars: g:ve_borders,
-          \ wrap: 0,
-          \ scrollbar: 1,
-          \ close: 'click'
-        \}
 
-  if (g:ve_fixed_w)
-    let l:ve_args.minwidth = g:ve_fixed_w
-    let l:ve_args.maxwidth = g:ve_fixed_w
+  let l:text = ve#update#screen_text(g:ve_search_txt, 0)
+
+  if (s:ve_popup == -1)
+
+    let l:ve_args = #{
+        \ title:'vim-Everything',
+            \ filter: 've#filter#call',
+            \ callback: 've#callback#call',
+            \ resize: 'g:ve_resize',
+            \ highlight: 'g:ve_style',
+            \ borderchars: g:ve_borders,
+            \ wrap: 0,
+            \ scrollbar: 1,
+            \ close: 'click'
+          \}
+
+    if (g:ve_fixed_w)
+      let l:ve_args.minwidth = g:ve_fixed_w
+      let l:ve_args.maxwidth = g:ve_fixed_w
+    endif
+
+    let s:ve_popup = popup_menu('', l:ve_args)
+
+  else
+    call popup_show(s:ve_popup)
   endif
 
-  let s:ve_popup = popup_menu(ve#update#screen_text(g:ve_search_txt, 0), l:ve_args)
+  call ve#jump#to_input(s:ve_popup)
+  call ve#plugin#text_refresh(s:ve_popup)
+
   if (g:ve_cursor_blink)
     let s:ve_cursor_state = 1
     let s:ve_timer = timer_start(g:ve_cursor_blink_speed, function('s:Blink'), {'repeat': -1}) 
   endif
 endfunc
 
-func! ve#plugin#close(id) abort
-
-  call popup_close(a:id, [-1, -1])
-
+func! s:ClearTimer() abort
   if (g:ve_cursor_blink && (s:ve_timer > -1))
     call timer_stop(s:ve_timer)
     let s:ve_timer = -1
   endif
+endfunc
+
+func! ve#plugin#close(id) abort
+  call popup_hide(a:id)
+  call s:ClearTimer()
+  return 1
+endfunc
+
+func! ve#plugin#destroy() abort
+  call ve#plugin#reset()
+  call s:ClearTimer()
+  call popup_close(a:id, [-1, -1])
   return 1
 endfunc
 
@@ -209,11 +241,7 @@ func! ve#plugin#search_text_in_path(file, path) abort
 
 endfunc
 
-func! ve#plugin#refresh(id = 0) abort
-
-  if (!ve#plugin#search_w(g:ve_search_txt, 0))
-    return 0
-  endif
+func! ve#plugin#text_refresh(id = 0) abort
 
   let l:id = a:id
   if (!l:id)
@@ -221,6 +249,16 @@ func! ve#plugin#refresh(id = 0) abort
   endif
 
   call popup_settext(l:id, ve#update#screen_text(g:ve_search_txt, 0))
+
+endfunc
+
+func! ve#plugin#refresh(id = 0) abort
+
+  if (!ve#plugin#search_w(g:ve_search_txt, 0))
+    return 0
+  endif
+
+  call ve#plugin#text_refresh(a:id)
 
 endfunc
 
@@ -236,4 +274,8 @@ func! ve#plugin#check_sep_terminated(path) abort
   endif
 
   return a:path
+endfunc
+
+func! ve#plugin#log(log) abort
+  echo('vim-everything: ' . a:log) 
 endfunc
