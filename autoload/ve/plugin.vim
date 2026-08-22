@@ -140,26 +140,8 @@ func! ve#plugin#search(txt) abort
   let l:text = ve#update#screen_text(g:ve_search_txt, 0)
 
   if (s:ve_popup == -1)
-
-    let l:ve_args = #{
-        \ title:'vim-Everything',
-            \ filter: 've#filter#call',
-            \ callback: 've#callback#call',
-            \ resize: 'g:ve_resize',
-            \ highlight: 'g:ve_style',
-            \ borderchars: g:ve_borders,
-            \ wrap: 0,
-            \ scrollbar: 1,
-            \ close: 'click'
-          \}
-
-    if (g:ve_fixed_w)
-      let l:ve_args.minwidth = g:ve_fixed_w
-      let l:ve_args.maxwidth = g:ve_fixed_w
-    endif
-
-    let s:ve_popup = popup_menu('', l:ve_args)
-
+    let s:ve_popup = popup_menu([''], {})
+    call ve#plugin#refresh_style()
   else
     call popup_show(s:ve_popup)
   endif
@@ -167,14 +149,40 @@ func! ve#plugin#search(txt) abort
   call ve#jump#to_input(s:ve_popup)
   call ve#plugin#text_refresh(s:ve_popup)
 
-  if (g:ve_cursor_blink)
+  if (g:ve_style.cursor.blink)
     let s:ve_cursor_state = 1
-    let s:ve_timer = timer_start(g:ve_cursor_blink_speed, function('s:Blink'), {'repeat': -1}) 
+    let s:ve_timer = timer_start(g:ve_style.cursor.blink, function('s:Blink'), {'repeat': -1}) 
   endif
 endfunc
 
+func! ve#plugin#refresh_style() abort
+  let l:ve_args = #{
+      \ title:'vim-Everything',
+          \ filter: 've#filter#call',
+          \ callback: 've#callback#call',
+          \ highlight: g:ve_style.window.style,
+          \ resize: g:ve_style.window.resize,
+          \ opacity: g:ve_style.window.opacity,
+          \ wrap: g:ve_style.window.wrap,
+          \ image: g:ve_style.window.bg_image,
+          \ borderhighlight: g:ve_style.window.border.style,
+          \ borderchars: g:ve_style.window.border.icons,
+          \ scrollbar: g:ve_style.window.scrollbar.enabled,
+          \ scrollbarhighlight: g:ve_style.window.scrollbar.style,
+          \ thumbhighlight: g:ve_style.window.scrollbar.thumb_style,
+          \ close: 'click'
+        \}
+
+  if (g:ve_style.window.fixed_w)
+    let l:ve_args.minwidth = g:ve_style.window.fixed_w
+    let l:ve_args.maxwidth = g:ve_style.window.fixed_w
+  endif
+
+  call popup_setoptions(s:ve_popup, l:ve_args)
+endfunc
+
 func! s:ClearTimer() abort
-  if (g:ve_cursor_blink && (s:ve_timer > -1))
+  if (g:ve_style.cursor.blink && (s:ve_timer > -1))
     call timer_stop(s:ve_timer)
     let s:ve_timer = -1
   endif

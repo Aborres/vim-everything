@@ -46,7 +46,7 @@ func! ve#update#up(id) abort
 endfunc
 
 func! ve#update#remove_internal_cursor(text, keep_cursor=1) abort
-  return substitute(a:text, g:ve_internal_cursor, a:keep_cursor ? g:ve_cursor : ' ', '')
+  return substitute(a:text, g:ve_internal_cursor, a:keep_cursor ? g:ve_style.cursor.icon : ' ', '')
 endfunc
 
 "These functions update the text in the buffers
@@ -61,11 +61,13 @@ func! ve#update#footer(id) abort
   let s:footer_text = []
   call add(s:footer_text, " ")
 
-  if (g:ve_footer_style < 2)
+  let l:footer_style = g:ve_style.footer.style
+
+  if (l:footer_style < 2)
     call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
   endif
 
-  if (g:ve_footer_style == 0)
+  if (l:footer_style == 0)
     if (len(g:ve_callbacks))
       let l:text = ""
       for l:c in g:ve_callbacks
@@ -75,7 +77,7 @@ func! ve#update#footer(id) abort
     endif
   endif
 
-  if (g:ve_footer_style < 1)
+  if (l:footer_style < 1)
     let l:fmt = "Clear: Input(%s) | Name(%s) | Path(%s) | Ext(%s) | Filter(%s)"
     call add(s:footer_text, printf(l:fmt, g:ve_clear_c, g:ve_clear_name, g:ve_clear_path, g:ve_clear_ext, g:ve_clear_filter))
   endif

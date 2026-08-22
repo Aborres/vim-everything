@@ -47,11 +47,10 @@ Variables ~
   |g:ve_list_size| 
   |g:ve_enable_number_jump|
   |g:ve_jump_shortcuts|
-  |g:ve_resize|
+  |g:ve_switch_focus|
   |g:ve_keep_prev_search|
   |g:ve_use_python3|
   |g:ve_file_results|
-  |g:ve_footer_style|
 
   KeyBindings:~
   |g:ve_clear_c|
@@ -61,15 +60,12 @@ Variables ~
   |g:ve_clear_filter|
   |g:ve_clear_last_folder|
 
-  Icons:~
-  |g:ve_cursor|
-  |g:ve_borders|
+  Style:~
+  |g:ve_style|
 
-  UI:~
-  |g:ve_fixed_w|
+  Backends:~
   |g:ve_use_alternative_search|
   |g:ve_alternative_search_mode|
-  |g:ve_switch_focus|
 
   Functions:~
   |g:ve_explore|
@@ -107,12 +103,11 @@ If enabled limits g:ve_list_size to len(g:ve_jump_shortcuts)
 <
 Shortcut keys to use for quick open from the list of items
 ------------------------------------------------------------------------------
-                                                                 *g:ve_resize*
+                                                           *g:ve_switch_focus*
 >
-  let g:ve_resize = 1 
+  let g:ve_switch_focus = 1
 <
-
-Toggles if the popup window should be resizeable with the mouse
+Whether to switch to a buffer if the search file is already opened
 ------------------------------------------------------------------------------
                                                        *g:ve_keep_prev_search*
 >
@@ -145,12 +140,6 @@ For Example:
 >
   f:texture.cpp \my_engine\
 <
-------------------------------------------------------------------------------
-                                                           *g:ve_footer_style*
->
-  let g:ve_footer_style = 0
-<
-0: All, 1: Simplified, 2: Stats only
 ------------------------------------------------------------------------------
                                                                 *g:ve_clear_c*
 >
@@ -193,24 +182,66 @@ Key used to clear filter from the input search, See: *g:ve_file_results*
 <
 Key used to clear last folder from the path in the input search
 ------------------------------------------------------------------------------
-                                                                 *g:ve_cursor*
+                                                                 *g:ve_style*
 >
-  let g:ve_cursor = '|' 
+let g:ve_style = #{
+      \ window: #{
+        \ style: '',
+        \ fixed_w: 128,
+        \ resize: 1, 
+        \ opacity: 100,
+        \ wrap: 0,
+        \ bg_image: [],
+        \ scrollbar: #{
+          \ enabled: 0,
+          \ style: '',
+          \ thumb_style: '',
+        \},
+        \ border: #{
+          \ icons: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+          \ style: [],
+        \},
+        \ },
+      \ cursor: #{
+        \ blink: 500, 
+        \ icon: '|', 
+      \ },
+      \ footer: #{
+        \ style: 0
+      \ },
+    \ }
 <
-Cursor Icon
-------------------------------------------------------------------------------
-                                                                *g:ve_borders*
-> 
-  let g:ve_borders = ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
-<
-Floating Window Borders
-------------------------------------------------------------------------------
-                                                                *g:ve_fixed_w*
+Structure holding styling for plugin, once the results window
+is opened for the first time the structure is ignored; however, style can be
+refreshed by calling:
 >
-  let g:ve_fixed_w = 128 
+  ve#plugin#refresh_style()
 <
+Window Options:
+        style: '' -> Custom styling 
+        fixed_w: 128 -> if anything but 0 makes the results window fixed width
+        resize: 1 -> Whether the window can be resized
+        opacity: 90 -> results window opacity
+        wrap: 0 -> Enables/disables text wrapping
+        bg_image: [] -> Array of pixels to use as custom bg for the window
 
-if set to any value, the window will have that size
+Scrollbar Options:
+        enabled: 0 -> Hides/shows scrollbar
+        style: '' -> Custom styling
+        thumb_style: '' -> Custom styling for scrollbar thumb
+
+Border Options:
+        icons: ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+        style: []
+
+See *popup_setoptions* for further assistance with these settings
+
+Cursor Options:
+        blink: 500 -> Blinking speed in ms, 0 disables blinking
+        icon: '|' -> Cursor icon
+
+Footer Options
+  style: 0 -> 0: All, 1: Simplified, 2: Stats only
 ------------------------------------------------------------------------------
                                                  *g:ve_use_alternative_search*
 >
@@ -225,12 +256,6 @@ don't support Everything.
   let g:ve_alternative_search_mode = 0 "0: fd, 1: rg
 <
 0: fd, 1: rg
-------------------------------------------------------------------------------
-                                                           *g:ve_switch_focus*
->
-  let g:ve_switch_focus = 1
-<
-Whether to switch to a buffer if the search file is already opened
 ------------------------------------------------------------------------------
                                                                 *g:ve_explore*
 >
