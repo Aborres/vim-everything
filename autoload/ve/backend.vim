@@ -25,11 +25,6 @@
 "
 " reset: Backend specific cleanup, no need to clean global state
 
-const g:ve_backend_type_es = 0 "Requires vim-jobs
-const g:ve_backend_type_fd = 1 "Requires vim-jobs
-const g:ve_backend_type_py = 2 "Requires python
-const g:ve_backend_type_cm = 3 "Custom, externally provided
-
 func! ve#backend#es_init() abort
 
   "TODO: will investigate wether is worth running this in parallel
@@ -44,22 +39,33 @@ func! ve#backend#es_init() abort
   return 1
 endfunc
 
-func! s:ESProcessOutput(json, offset, total) abort
+func! s:ProcessOutput(output, offset, total) abort
 
-  for l:i in range(a:offset, a:total -1)
-    let l:res = a:json[l:i]
+  let l:from = a:offset
+  let l:to   = min([(a:offset + a:total) - 1, len(a:output)])
 
-    let l:name = l:res.name
-    let l:file = l:res.filename
-    let l:attr = l:res.attributes
+  if (l:to > l:from)
 
-    call add(g:ve_r_names, l:name)
-    call add(g:ve_r_paths, l:file)
-    call add(g:ve_r_types, and(l:file, 16 != 0))
-    call add(g:ve_current_buff, l:name . ' ' . l:file)
-  endfor
+    for l:i in range(l:from, l:to)
+      let l:res = a:output[l:i]
 
-  let g:ve_num_r = len(g:ve_current_buff)
+      let l:name = l:res.name
+      let l:file = l:res.filename
+      let l:attr = l:res.attributes
+
+      call add(g:ve_r_names, l:name)
+      call add(g:ve_r_paths, l:file)
+      call add(g:ve_r_types, and(l:file, 16 != 0))
+      call add(g:ve_current_buff, l:name . ' ' . l:file)
+    endfor
+
+    let g:ve_num_r = len(g:ve_current_buff)
+
+    return 1
+
+  endif
+
+  return 0
 
 endfunc
 
@@ -70,7 +76,7 @@ endfunc
 
 func! s:ESExit(job) abort
   const l:raw =json_decode(join(a:job.parsed, ' '))
-  call s:ESProcessOutput(l:raw, 0, 20)
+  call s:ProcessOutput(l:raw, 0, 20)
 endfunc
 
 func! ve#backend#es_search() abort
@@ -96,7 +102,7 @@ func! ve#backend#es_search() abort
       const l:raw = system(l:res_query, ' ')
       const l:json = json_decode(l:raw)
 
-      call s:ESProcessOutput(l:json, 0, g:ve_list_size)
+      call s:ProcessOutput(l:json, 0, g:ve_list_size)
 
       "const l:res_query = [l:exec, g:ve_py_search_txt, '-s', '-json', '-name', '-full-path-and-name', '-attributes']
       "let l:args = { 'focus': 0, 'auto_kill': 1, 'on_log': function('s:ESUpdate'), 'on_pre_exit': function('s:ESExit') }
@@ -108,7 +114,7 @@ func! ve#backend#es_search() abort
     endif
   endif
 
-  "call s:ESProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_list_size)
+  "call s:ProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_list_size)
 
   return 1
 endfunc
@@ -120,7 +126,6 @@ endfunc
 func! ve#backend#es() abort
   return #{
       \ name: 'EverythingES',
-      \ platform: g:ve_backend_type_es,
       \ init:   function('ve#backend#es_init'),
       \ search: function('ve#backend#es_search'),
       \ reset:  function('ve#backend#es_reset'),
@@ -143,19 +148,59 @@ func! ve#backend#fd_init() abort
 
 endfunc
 
+func! s:GenerateFDOutput(raw) abort
+
+  let l:output = []
+  for l:res in a:raw
+    let l:item = #{ name = '', filename= '', attributes = 0 }
+    let l:item.name = fnamemodify(l:res, ':t')
+    let l:item.filename = l:res
+    let l:attributes = 0
+    call add(output, l:item)
+  endfor
+
+  return l:output
+endfunc
+
 func! ve#backend#fd_search() abort
+
+  if (g:ve_py_search_txt != g:ve_backend.cached_query)
+
+    let l:res_query = ['fd', g:ve_py_search_txt, '-i', '-a']
+
+    if (g:ve_py_search_txt[1] == ':')
+      if (g:ve_py_search_txt[0] == 'f')
+        call add(l:res_query, '-t f')
+      elseif (g:ve_py_search_txt[0] == 'd')
+        call add(l:res_query, '-t d')
+      endif
+    endif
+
+    let l:res_query = join(l:res_query, ' ')
+    let l:raw = split(system(l:res_query, ' '), "\n")
+
+    let g:ve_backend.cached_query   = g:ve_py_search_txt
+    let g:ve_backend.cached_results = s:GenerateFDOutput(l:raw)
+  endif
+
+  return s:ProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_list_size)
+
 endfunc
 
 func! ve#backend#fd_reset() abort
+  return 1
 endfunc
 
-const g:ve_fd_backend = #{
-      \ name: 'EverythingFD',
-      \ platform: g:ve_backend_type_fd,
-      \ init:   function('ve#backend#fd_init'),
-      \ search: function('ve#backend#fd_search'),
-      \ reset:  function('ve#backend#fd_reset'),
-    \ }
+func! ve#backend#fd() abort
+  return #{
+        \ name: 'EverythingFD',
+        \ init:   function('ve#backend#fd_init'),
+        \ search: function('ve#backend#fd_search'),
+        \ reset:  function('ve#backend#fd_reset'),
+        \ cached_query: '_NO_QUERY_',
+        \ cached_results: [],
+      \ }
+endfunc
 
 func! ve#backend#py_init() abort
 
@@ -185,6 +230,9 @@ func! ve#backend#py_search() abort
     python VE_SearchWrapper()
   endif
 
+  " Set by wrapper
+  return g:ve_status
+
 endfunc
 
 func! ve#backend#py_reset() abort
@@ -194,7 +242,6 @@ endfunc
 func! ve#backend#py() abort
 return #{
       \ name: 'EverythingPy',
-      \ platform: g:ve_backend_type_py,
       \ init:   function('ve#backend#py_init'),
       \ search: function('ve#backend#py_search'),
       \ reset:  function('ve#backend#py_reset'),

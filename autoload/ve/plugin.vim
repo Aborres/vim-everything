@@ -73,7 +73,7 @@ func! ve#plugin#init() abort
       return 0
     endif
 
-    const l:keys = ['name', 'platform', 'init', 'search', 'reset']
+    const l:keys = ['name', 'init', 'search', 'reset']
     for l:key in l:keys
       if (!has_key(g:ve_backend, l:key))
         call ve#plugin#log("Illformed backend, missing key, required keys are: " . string(l:keys))
@@ -96,11 +96,10 @@ func! ve#plugin#search_w(text, from) abort
   let g:ve_py_search_txt = ve#cursor#remove_cursor(g:ve_search_txt)
 
   let g:ve_offset_txt = a:from 
-  let g:ve_status = 1
 
-  call g:ve_backend.search()
-
+  let g:ve_status = g:ve_backend.search()
   return g:ve_status
+
 endfunc
 
 func ve#plugin#ve(keep_prev_search = 1) abort
@@ -134,6 +133,7 @@ func! ve#plugin#search(txt) abort
   endif
 
   if (!ve#plugin#search_w(l:search_text, 0))
+    call ve#plugin#log('Search failed')
     return 0
   endif
 
@@ -263,6 +263,7 @@ endfunc
 func! ve#plugin#refresh(id = 0) abort
 
   if (!ve#plugin#search_w(g:ve_search_txt, 0))
+    call ve#plugin#log('Search failed')
     return 0
   endif
 
