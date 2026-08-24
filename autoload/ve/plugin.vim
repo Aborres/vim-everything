@@ -141,11 +141,11 @@ func! ve#plugin#search(txt) abort
 
   if (s:ve_popup == -1)
     let s:ve_popup = popup_menu([''], {})
-    call ve#plugin#refresh_style()
   else
     call popup_show(s:ve_popup)
   endif
 
+  call ve#plugin#refresh_style()
   call ve#jump#to_input(s:ve_popup)
   call ve#plugin#text_refresh(s:ve_popup)
 
@@ -155,29 +155,50 @@ func! ve#plugin#search(txt) abort
   endif
 endfunc
 
-func! ve#plugin#refresh_style() abort
+func! s:GetStyle() abort
+
   let l:ve_args = #{
       \ title:'vim-Everything',
           \ filter: 've#filter#call',
           \ callback: 've#callback#call',
-          \ highlight: g:ve_style.window.style,
           \ resize: g:ve_style.window.resize,
           \ opacity: g:ve_style.window.opacity,
           \ wrap: g:ve_style.window.wrap,
-          \ image: g:ve_style.window.bg_image,
-          \ borderhighlight: g:ve_style.window.border.style,
           \ borderchars: g:ve_style.window.border.icons,
           \ scrollbar: g:ve_style.window.scrollbar.enabled,
-          \ scrollbarhighlight: g:ve_style.window.scrollbar.style,
-          \ thumbhighlight: g:ve_style.window.scrollbar.thumb_style,
           \ close: 'click'
         \}
+
+  if (len(g:ve_style.window.bg_image))
+    let l:ve_args.image = g:ve_style.window.bg_image
+  endif
+
+  if (g:ve_style.window.style != '')
+    let l:ve_args.highlight = g:ve_style.window.style
+  endif
+
+  if (len(g:ve_style.window.border.style))
+    let l:ve_args.borderhighlight = g:ve_style.window.border.style
+  endif
+
+  if (g:ve_style.window.scrollbar.style != '')
+    let l:ve_args.scrollbarhighlight = g:ve_style.window.scrollbar.style
+  endif
+
+  if (g:ve_style.window.scrollbar.thumb_style != '')
+    let l:ve_args.thumbhighlight = g:ve_style.window.scrollbar.thumb_style
+  endif
 
   if (g:ve_style.window.fixed_w)
     let l:ve_args.minwidth = g:ve_style.window.fixed_w
     let l:ve_args.maxwidth = g:ve_style.window.fixed_w
   endif
 
+  return l:ve_args
+endfunc
+
+func! ve#plugin#refresh_style() abort
+  let l:ve_args = s:GetStyle()
   call popup_setoptions(s:ve_popup, l:ve_args)
 endfunc
 

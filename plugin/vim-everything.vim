@@ -14,11 +14,15 @@ let g:ve_file_results = 1       "0: All, 1: Files, 2: Folders, can be overwritte
 
 " use PopupNotification to change BG color
 " use PopupSelected to change cursor color
-hi PopupSelected guifg=#000000 guibg=#ffa500
+
+hi VESelected guifg=#000000 guibg=#ffa500 ctermfg=0 ctermbg=24
+hi VEStyle guifg=#ffffff guibg=NONE ctermfg=1 ctermbg=24
+
+hi link PopupSelected VESelected
 
 let g:ve_style = #{
       \ window: #{
-        \ style: '',
+        \ style: 'VEStyle',
         \ fixed_w: 128,
         \ resize: 1, 
         \ opacity: 100,
