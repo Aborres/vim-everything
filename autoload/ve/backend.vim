@@ -42,7 +42,7 @@ endfunc
 func! s:ProcessOutput(output, offset, total) abort
 
   let l:from = a:offset
-  let l:to   = min([(a:offset + a:total) - 1, len(a:output)])
+  let l:to   = min([(a:offset + a:total), len(a:output)]) - 1
 
   if (l:to > l:from)
 
@@ -152,7 +152,7 @@ func! s:GenerateFDOutput(raw) abort
 
   let l:output = []
   for l:res in a:raw
-    let l:item = #{ name = '', filename= '', attributes = 0 }
+    let l:item = #{ name: '', filename: '', attributes: 0 }
     let l:item.name = fnamemodify(l:res, ':t')
     let l:item.filename = l:res
     let l:attributes = 0
@@ -162,11 +162,21 @@ func! s:GenerateFDOutput(raw) abort
   return l:output
 endfunc
 
+func! s:FixQuery(query) abort
+  let l:pos = ve#filter#split_name_path(trim(a:query))
+  if (l:pos == 0)
+    return '. ' . a:query
+  endif
+  return a:query
+endfunc
+
 func! ve#backend#fd_search() abort
 
   if (g:ve_py_search_txt != g:ve_backend.cached_query)
 
-    let l:res_query = ['fd', g:ve_py_search_txt, '-i', '-a']
+    let l:query = s:FixQuery(g:ve_py_search_txt)
+
+    let l:res_query = ['fd', l:query, '-i', '-a']
 
     if (g:ve_py_search_txt[1] == ':')
       if (g:ve_py_search_txt[0] == 'f')
