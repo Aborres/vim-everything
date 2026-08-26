@@ -11,25 +11,49 @@ import vim
 import threading
 import unicodedata
 
-def __UpdateVimBuffers(names, paths, types):
+def __BytesToString(size):
+
+  offset = 500
+
+  if (size < 1000):
+    return str(size) + ' B'
+
+  if (size < offset * 1000):
+    return str(size / 1000) + 'KB'
+
+  if (size < offset * (1000 * 1000)):
+    return str(size / (1000 * 1000)) + 'MB'
+
+  return str(size / (1000 * 1000 * 1000)) + 'GB'
+
+def __Count(count, buffer):
+  max_l = 1
+  for i in range(count):
+    max_l = max(len(buffer[i]), max_l)
+  return max_l
+
+def __Delta(max_l, e):
+    
+  diff = max_l - len(e)
+  
+  s = "" 
+  for j in range(0, diff):
+    s += " "
+  return s
+
+def __UpdateVimBuffers(names, paths, types, sizes, modds, inc_size, inc_modd):
   out = []
-
-  count = len(names)
-
-  curr = 1
-  for i in range(0, count):
-    curr = max(len(names[i]), curr)
 
   enable_jump = vim.vars["ve_enable_number_jump"]
   valid_ids = vim.eval("g:ve_jump_shortcuts")
 
-  for i in range(0, count):
+  count = len(names)
 
-    diff = curr - len(names[i])
+  max_l = __Count(count, names)
 
-    s = names[i]
-    for j in range(0, diff):
-      s += " "
+  for i in range(count):
+
+    s = names[i] + __Delta(max_l, names[i])
 
     s += " | "
     s += paths[i]
@@ -38,9 +62,37 @@ def __UpdateVimBuffers(names, paths, types):
       s = f"{valid_ids[i]}: " + s
     out.append(s)
 
-  vim.command("let g:ve_r_names=%s"%names)
-  vim.command("let g:ve_r_paths=%s"%paths)
-  vim.command("let g:ve_r_types=%s"%types)
+  size_t = []
+
+  if (inc_size):
+    max_l = __Count(count, out)
+
+    for i in range(count):
+
+      size_t.append(__BytesToString(sizes[i]))
+
+      s = __Delta(max_l, out[i])
+      s += " | "
+
+      out[i] += s
+
+    max_l = __Count(count, size_t)
+
+    for i in range(count):
+      s = __Delta(max_l, size_t[i])
+      s += size_t[i]
+      s += " | "
+      out[i] += s
+
+  if (inc_modd):
+    for i in range(count):
+      out[i] += modds[i] + " | "
+
+  vim.command("let g:ve_results.names=%s"%names)
+  vim.command("let g:ve_results.paths=%s"%paths)
+  vim.command("let g:ve_results.types=%s"%types)
+  vim.command("let g:ve_results.sizes=%s"%sizes)
+  vim.command("let g:ve_results.modds=%s"%modds)
   vim.command("let g:ve_current_buff=%s"%out)
 
 def __VE_QueryType(text):
@@ -60,8 +112,7 @@ def __VE_QueryType(text):
 
   return text, type
   
-
-def VE_Search(text, f, buff_size):
+def VE_Search(text, f, buff_size, inc_size, inc_modd):
 
   text = text.replace("/", "\\") #standard any separator so Everything is happy
   text = text.replace("\\\\", "\\")
@@ -78,7 +129,7 @@ def VE_Search(text, f, buff_size):
 
   text, type = __VE_QueryType(text)
 
-  if (not e.search(text, type, f, buff_size)):
+  if (not e.search(text, type, f, buff_size, inc_size, inc_modd)):
     return 0
 
   total_r    = e.query.total
@@ -86,11 +137,17 @@ def VE_Search(text, f, buff_size):
   file_names = e.query.names
   file_paths = e.query.paths
   file_types = e.query.types
+  file_sizes = e.query.sizes
+  file_modds = e.query.modds
 
   vim.command("let g:ve_total_r=%s"%total_r)
   vim.command("let g:ve_num_r=%s"%num_r)
 
-  __UpdateVimBuffers(file_names, file_paths, file_types)
+  # For now non everything paths don't support sizes and modd
+  inc_size = inc_size and not use_as
+  inc_modd = inc_modd and not use_as
+
+  __UpdateVimBuffers(file_names, file_paths, file_types, file_sizes, file_modds, inc_size, inc_modd)
 
   return 1
 

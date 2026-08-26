@@ -8,10 +8,14 @@
 "     - g:ve_py_search_txt "Text to search
 "     - g:ve_offset_txt    "Offset within results to return
 "     - g:ve_list_size     "Total size of search
-"   Must fill the followin variables:
-"     - g:ve_r_names=[]      "List of names for results
-"     - g:ve_r_paths=[]      "List of paths for results
-"     - g:ve_r_types=[]      "List of types for results (folder 1 or file 0)
+"   Must fill the following variables:
+"     let g:ve_results = #{
+"           \ names: [], "List of names for results
+"           \ paths: [], "List of paths for results
+"           \ types: [], "List of types for results (folder 1 or file 0)
+"           \ sizes: [], "List of sizes for results
+"           \ modds: [], "List of modification times for results
+"         \ }
 "     - g:ve_current_buff=[] "List with formated results for displaying in UI
 "     - g:ve_total_r=0       "Total number of files matching query
 "     - g:ve_num_r=0         "Total number of returned files
@@ -53,9 +57,9 @@ func! s:ProcessOutput(output, offset, total) abort
       let l:file = l:res.filename
       let l:attr = l:res.attributes
 
-      call add(g:ve_r_names, l:name)
-      call add(g:ve_r_paths, l:file)
-      call add(g:ve_r_types, and(l:file, 16 != 0))
+      call add(g:ve_results.names, l:name)
+      call add(g:ve_results.paths, l:file)
+      call add(g:ve_results.types, and(l:file, 16 != 0))
       call add(g:ve_current_buff, l:name . ' ' . l:file)
     endfor
 

@@ -2,6 +2,9 @@ import os
 import ctypes
 import sys
 import time
+import struct
+import datetime
+from results import *
 
 #defines
 EVERYTHING_REQUEST_FILE_NAME                           = 0x00000001
@@ -56,39 +59,23 @@ EVERYTHING_ERROR_IPC	         = 4
 EVERYTHING_ERROR_MEMORY	         = 5
 EVERYTHING_ERROR_INVALIDCALL	 = 6
 
-class EverythingResults:
-  def __init__(self, name):
-    self.name = name
-    self.num     = 0
-    self.total   = 0
-    self.names   = []
-    self.paths   = []
-    self.results = []
-    self.types   = []
-
-  def check(self):
-    l_n = len(self.names)
-    l_p = len(self.paths)
-    l_r = len(self.results)
-    l_t = len(self.types)
-    v_n = self.num != l_n
-    v_p = self.num != l_p
-    v_r = self.num != l_r
-    v_t = self.num != l_t
-    if (v_n or v_p or v_r or v_t):
-      print(f"Invalid results from Everything ({self.name}): {self.num}, {l_n}, {l_p}, {l_r}, {l_t}")
-
-  def reset(self):
-    self.num     = 0
-    self.total   = 0
-    self.names   = []
-    self.paths   = []
-    self.results = []
-    self.types   = []
+# From everything example: https://www.voidtools.com/support/everything/sdk/python/
+WINDOWS_TICKS = int(1/10**-7)  # 10,000,000 (100 nanoseconds or .1 microseconds)
+WINDOWS_EPOCH = datetime.datetime.strptime('1601-01-01 00:00:00',
+                                           '%Y-%m-%d %H:%M:%S')
+POSIX_EPOCH = datetime.datetime.strptime('1970-01-01 00:00:00',
+                                         '%Y-%m-%d %H:%M:%S')
+EPOCH_DIFF = (POSIX_EPOCH - WINDOWS_EPOCH).total_seconds()  # 11644473600.0
+WINDOWS_TICKS_TO_POSIX_EPOCH = EPOCH_DIFF * WINDOWS_TICKS  # 116444736000000000.0
+def get_time(filetime):
+    """Convert windows filetime winticks to python datetime.datetime."""
+    winticks = struct.unpack('<Q', filetime)[0]
+    microsecs = (winticks - WINDOWS_TICKS_TO_POSIX_EPOCH) / WINDOWS_TICKS
+    return str(datetime.datetime.fromtimestamp(microsecs))
 
 class Everything:
   def __init__(self):
-    self.query = EverythingResults("Query")
+    self.query = QueryResults("Query")
 
     self.dll_name = "Everything32.dll"
     if (sys.maxsize > 2**32):
@@ -99,14 +86,21 @@ class Everything:
     self.api.Everything_GetResultDateModified.argtypes = [ctypes.c_int,ctypes.POINTER(ctypes.c_ulonglong)]
     self.api.Everything_GetResultSize.argtypes = [ctypes.c_int,ctypes.POINTER(ctypes.c_ulonglong)]
 
-  def search(self, text, query_type = 0, offset = 0, max = 10):
+  def search(self, text, query_type = 0, offset = 0, max = 10, inc_size = 0, inc_modd = 0):
     self.reset()
 
     if (not self.api.Everything_IsDBLoaded()):
       print("VE: Failed to load DB, Is Everything running?")
       return
 
-    flags = EVERYTHING_REQUEST_FILE_NAME | EVERYTHING_REQUEST_PATH
+    flags = EVERYTHING_REQUEST_FILE_NAME | EVERYTHING_REQUEST_PATH 
+
+    if (inc_size):
+      flags |= EVERYTHING_REQUEST_SIZE
+
+    if (inc_modd):
+      flags |= EVERYTHING_REQUEST_DATE_MODIFIED  
+
     self.api.Everything_SetRequestFlags(flags)
     self.api.Everything_SetMatchPath(False)
     self.api.Everything_SetMatchWholeWord(False)
@@ -136,10 +130,20 @@ class Everything:
       name = self.api.Everything_GetResultFileNameW(i)
       is_folder = self.api.Everything_IsFolderResult(i)
 
-      self.query.types.append(is_folder)
-
       path = ctypes.create_unicode_buffer(260)
       self.api.Everything_GetResultFullPathNameW(i, path, 260)
+
+      size = 0
+      if (inc_size):
+        size = ctypes.c_ulonglong(1)
+        self.api.Everything_GetResultSize(i, size)
+        size = size.value
+
+      modified = 0
+      if (inc_modd):
+        modified = ctypes.c_ulonglong(1)
+        self.api.Everything_GetResultDateModified(i, modified)
+        modified = get_time(modified)
 
       name = ctypes.wstring_at(name)
       path = ctypes.wstring_at(path)
@@ -150,11 +154,7 @@ class Everything:
       if (not is_folder):
         path = path[:path.rfind('/')]
 
-      self.query.names.append(name)
-      self.query.paths.append(path)
-
-      res = (name, path)
-      self.query.results.append(res)
+      self.query.add(name, path, is_folder, size, modified)
 
     self.query.check()
 

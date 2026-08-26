@@ -10,7 +10,7 @@ func! ve#callback#add_callback(c) abort
 endfunc
 
 func! ve#callback#get_file_full_path(r) abort
-  return g:ve_r_paths[a:r] . "/" . g:ve_r_names[a:r]
+  return g:ve_results.paths[a:r] . "/" . g:ve_results.names[a:r]
 endfunc
 
 func! s:IsFileAlreadyOpened(path) abort
@@ -44,8 +44,8 @@ func! ve#callback#call(id, result) abort
 
   if (l:r > -1 && g:ve_num_r > 0)
 
-    let l:path = g:ve_r_paths[l:r]
-    let l:is_folder = g:ve_r_types[l:r]
+    let l:path = g:ve_results.paths[l:r]
+    let l:is_folder = g:ve_results.types[l:r]
 
     if (g:ve_switch_focus)
 

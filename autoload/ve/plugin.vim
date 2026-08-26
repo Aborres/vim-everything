@@ -40,9 +40,13 @@ func! ve#plugin#reset() abort
   let g:ve_total_r = 0
   let g:ve_num_r   = 0
 
-  let g:ve_r_names = []
-  let g:ve_r_paths = []
-  let g:ve_r_types = []
+  let g:ve_results = #{
+        \ names: [],
+        \ paths: [],
+        \ types: [],
+        \ sizes: [],
+        \ modds: [],
+      \ }
 
   let g:ve_current_buff = []
 
@@ -193,6 +197,10 @@ func! s:GetStyle() abort
     let l:ve_args.minwidth = g:ve_style.window.fixed_w
     let l:ve_args.maxwidth = g:ve_style.window.fixed_w
   endif
+
+  let l:height = ve#update#header_len() + g:ve_list_size + ve#update#footer_len()
+  let l:ve_args.minheight = l:height
+  let l:ve_args.maxheight = l:height
 
   return l:ve_args
 endfunc

@@ -2,47 +2,18 @@ import os
 import shutil
 import subprocess
 from enum import Enum 
-
-class FindResults:
-  def __init__(self, name):
-    self.name = name
-    self.num     = 0
-    self.total   = 0
-    self.names   = []
-    self.paths   = []
-    self.results = []
-    self.types   = []
-
-  def check(self):
-    l_n = len(self.names)
-    l_p = len(self.paths)
-    l_r = len(self.results)
-    l_t = len(self.types)
-    v_n = self.num != l_n
-    v_p = self.num != l_p
-    v_r = self.num != l_r
-    v_t = self.num != l_t
-    if (v_n or v_p or v_r or v_t):
-      print(f"Invalid results from Everything ({self.name}): {self.num}, {l_n}, {l_p}, {l_r}, {l_t}")
-
-  def reset(self):
-    self.num     = 0
-    self.total   = 0
-    self.names   = []
-    self.paths   = []
-    self.results = []
-    self.types   = []
+from results import *
 
 class Find:
   def __init__(self):
     self.mode = 0
-    self.query = FindResults("Query")
+    self.query = QueryResults("Query")
 
   def setMode(self, mode):
       self.mode = mode
 
   # max is ignored here as fd or rg don't return data in the same way Everything does
-  def search(self, text, type = 0, offset = 0, max = 10):
+  def search(self, text, type = 0, offset = 0, max = 10, inc_size = 0, inc_modd = 0):
     self.reset()
 
     text = self.normalize(text)
@@ -53,10 +24,10 @@ class Find:
     if (len(text)):
       name, path = self.splitNamePath(text)
 
-    query = self.queryFd(name, path, type)
+    query = self.queryFd(name, path, type, offset, max, inc_size, inc_modd)
 
     if (self.mode == 1):
-      query = self.queryRg(name, path, type)
+      query = self.queryRg(name, path, type, offset, max, inc_size, inc_modd)
 
     if (query == ""):
       return 0
@@ -71,7 +42,7 @@ class Find:
 
     return 1
 
-  def queryFd(self, name, path, type):
+  def queryFd(self, name, path, type, offset = 0, max = 0, inc_size = 0, inc_modd = 0):
 
     if (not self.exists("fd")):
         return ""
@@ -90,7 +61,7 @@ class Find:
     query += f"{name} {path}"
     return query
 
-  def queryRg(self, name, path, type):
+  def queryRg(self, name, path, type, offset = 0, max = 0, inc_size = 0, inc_modd = 0):
 
     if (not self.exists("rg")):
         return ""
@@ -156,19 +127,14 @@ class Find:
         name = os.path.basename(r)
         path = r.replace(name, "")
 
-        self.query.names.append(name)
-        self.query.paths.append(path)
+        is_folder = 1 if os.path.isdir(r) else 0
 
-        self.query.results.append((name, path))
-
-        is_folder = os.path.isdir(r)
-        self.query.types.append(1 if is_folder else 0)
+        self.query.add(name, path, is_folder, 0, '')
 
   def printResults(self):
     print(f"Total Results: {self.query.total}")
     print(f"Names: {self.query.names}")
     print(f"Paths: {self.query.paths}")
-    print(f"Results: {self.query.results}")
     print(f"File Types: {self.query.types}")
   
   def reset(self):

@@ -5,7 +5,13 @@ let s:footer_text = []
 func! ve#update#screen_text(header, footer, keep_cursor=1) abort
   let l:out = []
   let l:out += ve#update#header(a:header, a:keep_cursor)
-  let l:out += g:ve_current_buff
+
+  let l:results = repeat([''], g:ve_list_size)
+  for l:i in range(0, len(g:ve_current_buff) - 1)
+    let l:results[l:i] = g:ve_current_buff[l:i]
+  endfor
+  let l:out += l:results 
+
   let l:out += ve#update#footer(a:footer)
   return l:out
 endfunc
@@ -57,6 +63,10 @@ func! ve#update#header(text, keep_cursor=1) abort
   return s:header_text
 endfunc
 
+func! ve#update#header_len() abort
+  return len(s:header_text)
+endfunc
+
 func! ve#update#footer(id) abort
   let s:footer_text = []
   call add(s:footer_text, " ")
@@ -84,6 +94,10 @@ func! ve#update#footer(id) abort
 
   call add(s:footer_text, "Num res: " . g:ve_total_r . " | Idx: " . a:id . " | Pag: " . g:ve_curr_pag . "/" . (ve#filter#total_pages() + 1))
   return s:footer_text
+endfunc
+
+func! ve#update#footer_len() abort
+  return len(s:footer_text)
 endfunc
 
 func! ve#update#to_list(id) abort

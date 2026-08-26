@@ -6,6 +6,8 @@ let g:ve_jump_shortcuts = [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'q
 let g:ve_keep_prev_search = 1   "Forces VE to keep the input text in between searchs
 let g:ve_use_python3 = 1        "Set g:ve_use_python3 = 0 to use python27
 let g:ve_file_results = 1       "0: All, 1: Files, 2: Folders, can be overwritten using a:, f:, d: in the input field, this setting doesn't work with the rg fallback
+let g:ve_results_size = 1
+let g:ve_results_mod_date = 1
 
 " VE(keep_prev_search = 1) "Searchs previous search if g:ve_keep_prev_search == 1
 " VE_Path()                "Searchs input text but keeps the input path if g:ve_keep_prev_search == 1
@@ -23,7 +25,7 @@ hi link PopupSelected VESelected
 let g:ve_style = #{
       \ window: #{
         \ style: 'VEStyle',
-        \ fixed_w: 128,
+        \ fixed_w: &columns * 2 / 3,
         \ resize: 1, 
         \ opacity: 100,
         \ wrap: 0,
