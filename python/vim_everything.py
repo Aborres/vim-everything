@@ -41,7 +41,7 @@ def __Delta(max_l, e):
     s += " "
   return s
 
-def __UpdateVimBuffers(names, paths, types, sizes, modds, inc_size, inc_modd):
+def __UpdateVimBuffers(names, paths, types, sizes, modds, inc_size, inc_modd, max_buff_size):
   out = []
 
   enable_jump = vim.vars["ve_enable_number_jump"]
@@ -65,28 +65,30 @@ def __UpdateVimBuffers(names, paths, types, sizes, modds, inc_size, inc_modd):
   size_t = []
 
   if (inc_size):
+
     max_l = __Count(count, out)
+    if (max_l < max_buff_size):
 
+      for i in range(count):
+
+        size_t.append(__BytesToString(sizes[i]))
+
+        s = __Delta(max_l, out[i])
+        s += " | "
+
+        out[i] += s
+
+      max_l = __Count(count, size_t)
+
+      for i in range(count):
+        s = __Delta(max_l, size_t[i])
+        s += size_t[i]
+        s += " | "
+        out[i] += s
+
+  if (inc_modd and (max_l < max_buff_size)):
     for i in range(count):
-
-      size_t.append(__BytesToString(sizes[i]))
-
-      s = __Delta(max_l, out[i])
-      s += " | "
-
-      out[i] += s
-
-    max_l = __Count(count, size_t)
-
-    for i in range(count):
-      s = __Delta(max_l, size_t[i])
-      s += size_t[i]
-      s += " | "
-      out[i] += s
-
-  if (inc_modd):
-    for i in range(count):
-      out[i] += modds[i] + " | "
+      out[i] += modds[i]
 
   vim.command("let g:ve_results.names=%s"%names)
   vim.command("let g:ve_results.paths=%s"%paths)
@@ -147,7 +149,8 @@ def VE_Search(text, f, buff_size, inc_size, inc_modd):
   inc_size = inc_size and not use_as
   inc_modd = inc_modd and not use_as
 
-  __UpdateVimBuffers(file_names, file_paths, file_types, file_sizes, file_modds, inc_size, inc_modd)
+  max_buff_size = vim.vars["ve_style"]["window"]["fixed_w"]
+  __UpdateVimBuffers(file_names, file_paths, file_types, file_sizes, file_modds, inc_size, inc_modd, max_buff_size)
 
   return 1
 
