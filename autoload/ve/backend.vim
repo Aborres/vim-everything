@@ -100,13 +100,13 @@ func! ve#backend#es_search() abort
       const l:folders_filter = '/ad' 
       const l:files_filter   = '/a-d' 
 
-      let l:res_query = [l:exec, g:ve_py_search_txt, '-s', '-o', g:ve_offset_txt, '-n', g:ve_list_size, '-json', '-name', '-full-path-and-name', '-attributes']
+      let l:res_query = [l:exec, g:ve_py_search_txt, '-s', '-o', g:ve_offset_txt, '-n', ve#filter#list_size(), '-json', '-name', '-full-path-and-name', '-attributes']
 
       let l:res_query = join(l:res_query, ' ')
       const l:raw = system(l:res_query, ' ')
       const l:json = json_decode(l:raw)
 
-      call s:ProcessOutput(l:json, 0, g:ve_list_size)
+      call s:ProcessOutput(l:json, 0, ve#filter#list_size())
 
       "const l:res_query = [l:exec, g:ve_py_search_txt, '-s', '-json', '-name', '-full-path-and-name', '-attributes']
       "let l:args = { 'focus': 0, 'auto_kill': 1, 'on_log': function('s:ESUpdate'), 'on_pre_exit': function('s:ESExit') }
@@ -197,7 +197,7 @@ func! ve#backend#fd_search() abort
     let g:ve_backend.cached_results = s:GenerateFDOutput(l:raw)
   endif
 
-  return s:ProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_list_size)
+  return s:ProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_total_r)
 
 endfunc
 

@@ -145,11 +145,11 @@ func! ve#plugin#search(txt) abort
 
   if (s:ve_popup == -1)
     let s:ve_popup = popup_menu([''], {})
+    call ve#plugin#refresh_style()
   else
     call popup_show(s:ve_popup)
   endif
 
-  call ve#plugin#refresh_style()
   call ve#jump#to_input(s:ve_popup)
   call ve#plugin#text_refresh(s:ve_popup)
 
@@ -198,9 +198,10 @@ func! s:GetStyle() abort
     let l:ve_args.maxwidth = g:ve_style.window.fixed_w
   endif
 
-  let l:height = ve#update#header_len() + g:ve_list_size + ve#update#footer_len()
-  let l:ve_args.minheight = l:height
-  let l:ve_args.maxheight = l:height
+  let l:min_height = ve#update#header_len() + ve#update#footer_len()
+  let l:max_height = l:min_height + ve#filter#list_size()
+  let l:ve_args.minheight = l:min_height
+  let l:ve_args.maxheight = l:max_height
 
   return l:ve_args
 endfunc

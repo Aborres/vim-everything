@@ -188,6 +188,7 @@ let g:ve_style = #{
       \ window: #{
         \ style: '',
         \ fixed_w: 128,
+        \ fixed_h: 1,
         \ resize: 1, 
         \ opacity: 100,
         \ wrap: 0,
@@ -218,16 +219,18 @@ refreshed by calling:
   ve#plugin#refresh_style()
 <
 Window Options:
-        style: '' -> Custom styling 
+        style: ''    -> Custom styling 
         fixed_w: 128 -> if anything but 0 makes the results window fixed width
-        resize: 1 -> Whether the window can be resized
-        opacity: 90 -> results window opacity
-        wrap: 0 -> Enables/disables text wrapping
+        fixed_h: 1   -> Boolean, Enables/Disables window size 
+                        to follow ve_list_size rules or resize base on results
+        resize: 1    -> Boolean, Whether the window can be resized
+        opacity: 90  -> Results window opacity
+        wrap: 0      -> Enables/disables text wrapping
         bg_image: [] -> Array of pixels to use as custom bg for the window
 
 Scrollbar Options:
-        enabled: 0 -> Hides/shows scrollbar
-        style: '' -> Custom styling
+        enabled: 0      -> Boolean, Hides/shows scrollbar
+        style: ''       -> Custom styling
         thumb_style: '' -> Custom styling for scrollbar thumb
 
 Border Options:
@@ -238,7 +241,7 @@ See *popup_setoptions* for further assistance with these settings
 
 Cursor Options:
         blink: 500 -> Blinking speed in ms, 0 disables blinking
-        icon: '|' -> Cursor icon
+        icon: '|'  -> Cursor icon
 
 Footer Options
   style: 0 -> 0: All, 1: Simplified, 2: Stats only

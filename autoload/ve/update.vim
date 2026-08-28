@@ -3,15 +3,16 @@ let s:header_text = []
 let s:footer_text = []
 
 func! ve#update#screen_text(header, footer, keep_cursor=1) abort
+
   let l:out = []
   let l:out += ve#update#header(a:header, a:keep_cursor)
 
-  let l:results = repeat([''], g:ve_list_size)
-  for l:i in range(0, len(g:ve_current_buff) - 1)
-    let l:results[l:i] = g:ve_current_buff[l:i]
-  endfor
-  let l:out += l:results 
+  let l:results = copy(g:ve_current_buff)
+  if (g:ve_style.window.fixed_h)
+    let l:results += repeat([''], ve#filter#list_size() - len(l:results))
+  endif
 
+  let l:out += l:results 
   let l:out += ve#update#footer(a:footer)
   return l:out
 endfunc

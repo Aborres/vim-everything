@@ -26,6 +26,7 @@ let g:ve_style = #{
       \ window: #{
         \ style: 'VEStyle',
         \ fixed_w: &columns * 2 / 3,
+        \ fixed_h: 1,
         \ resize: 1, 
         \ opacity: 100,
         \ wrap: 0,

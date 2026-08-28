@@ -12,7 +12,7 @@ def VE_SearchWrapper():
 
     text = vim.eval('g:ve_py_search_txt')
     f = int(vim.eval('g:ve_offset_txt'))
-    max = int(vim.eval('g:ve_list_size'))
+    max = int(vim.eval('ve#filter#list_size()'))
     inc_size = int(vim.eval('g:ve_results_size'))
     inc_modd = int(vim.eval('g:ve_results_mod_date'))
 
