@@ -373,8 +373,12 @@ func! s:FilterInput_mode(id, key) abort
   endif
 
   if (a:key == "\<CR>") "Enter
-    let g:ve_current_mode = g:ve_nav_mode
-    return ve#jump#to_first_element(a:id)
+    if (g:ve_num_r)
+      let g:ve_current_mode = g:ve_nav_mode
+      return ve#jump#to_first_element(a:id)
+    else
+      return 1
+    endif
   endif
 
   if (a:key == "\<Esc>")

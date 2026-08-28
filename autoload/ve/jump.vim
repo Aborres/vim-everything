@@ -1,7 +1,6 @@
 func ve#jump#to_element(id, e)
   let g:ve_screen_space_idx = a:e
   call win_execute(a:id, ":". (g:ve_screen_space_idx + 1))
-  
   return 1
 endfunc
 
