@@ -174,7 +174,7 @@ Key used to clear ext from the input search
   let g:ve_clear_filter = '%'
 <
 
-Key used to clear filter from the input search, See: *g:ve_file_results*
+Key used to clear filter from the input search, See: g:ve_file_results
 ------------------------------------------------------------------------------
                                                       *g:ve_clear_last_folder*
 >
