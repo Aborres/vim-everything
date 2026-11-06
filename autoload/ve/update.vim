@@ -8,7 +8,7 @@ func! ve#update#screen_text(header, footer, keep_cursor=1) abort
   let l:out += ve#update#header(a:header, a:keep_cursor)
 
   let l:results = copy(g:ve_current_buff)
-  if (g:ve_style.window.fixed_h)
+  if (g:ve.style.window.fixed_h)
     let l:results += repeat([''], ve#filter#list_size() - len(l:results))
   endif
 
@@ -53,7 +53,7 @@ func! ve#update#up(id) abort
 endfunc
 
 func! ve#update#remove_internal_cursor(text, keep_cursor=1) abort
-  return substitute(a:text, g:ve_internal_cursor, a:keep_cursor ? g:ve_style.cursor.icon : ' ', '')
+  return substitute(a:text, g:ve_internal_cursor, a:keep_cursor ? ve#globals#style().cursor.icon : ' ', '')
 endfunc
 
 "These functions update the text in the buffers
@@ -72,16 +72,16 @@ func! ve#update#footer(id) abort
   let s:footer_text = []
   call add(s:footer_text, " ")
 
-  let l:footer_style = g:ve_style.footer.style
+  let l:footer_style = ve#globals#style().footer.style
 
   if (l:footer_style < 2)
     call add(s:footer_text, "Esc: Close | Enter: Open file | V: VSplit | S: HSplit | T: New Tab")
   endif
 
   if (l:footer_style == 0)
-    if (len(g:ve_callbacks))
+    if (len(ve#globals#callbacks()))
       let l:text = ""
-      for l:c in g:ve_callbacks
+      for l:c in ve#globals#callbacks()
         let l:text = l:text . printf("%s(%s) ", l:c[1], l:c[0])
       endfor
       call add(s:footer_text, l:text)
@@ -89,11 +89,16 @@ func! ve#update#footer(id) abort
   endif
 
   if (l:footer_style < 1)
-    let l:fmt = "Clear: Input(%s) | Name(%s) | Path(%s) | Ext(%s) | Filter(%s)"
-    call add(s:footer_text, printf(l:fmt, g:ve_clear_c, g:ve_clear_name, g:ve_clear_path, g:ve_clear_ext, g:ve_clear_filter))
+    const l:fmt = "Clear: Input(%s) | Name(%s) | Path(%s) | Ext(%s) | Filter(%s)"
+    call add(s:footer_text, printf(l:fmt, ve#globals#shortcuts_clear(),
+                                        \ ve#globals#shortcuts_clear_name(),
+                                        \ ve#globals#shortcuts_clear_path(),
+                                        \ ve#globals#shortcuts_clear_ext(),
+                                        \ ve#globals#shortcuts_clear_filter()))
   endif
 
-  call add(s:footer_text, "Num res: " . g:ve_total_r . " | Idx: " . a:id . " | Pag: " . g:ve_curr_pag . "/" . (ve#filter#total_pages() + 1))
+  let l:footer_fmt = "Num res: %d | Idx: %d | Pag: %d/%d | History: %d"
+  call add(s:footer_text, printf(footer_fmt, g:ve_total_r, a:id, g:ve_curr_pag, (ve#filter#total_pages() + 1), ve#cache#num_queries()))
   return s:footer_text
 endfunc
 
@@ -112,10 +117,10 @@ endfunc
 func! ve#update#screen_body(id, keep_cursor=1) abort
   let l:list = ve#update#to_list(g:ve_screen_space_idx)
   let l:text = ve#update#screen_text(g:ve_search_txt, list, a:keep_cursor)
-  call popup_settext(a:id, l:text)
+  call ve#plugin#set_text(a:id, l:text)
 endfunc
 
 func! ve#update#screen_footer(id, txt) abort
   let l:text = ve#update#screen_text(g:ve_search_txt, a:txt)
-  call popup_settext(a:id, l:text)
+  call ve#plugin#set_text(a:id, l:text)
 endfunc

@@ -7,7 +7,7 @@
 "   Must read 
 "     - g:ve_py_search_txt "Text to search
 "     - g:ve_offset_txt    "Offset within results to return
-"     - g:ve_list_size     "Total size of search
+"     - g:ve.config.list_size     "Total size of search
 "   Must fill the following variables:
 "     let g:ve_results = #{
 "           \ names: [], "List of names for results
@@ -28,6 +28,10 @@
 "   Must return 1 or 0 depending on whether the search was successful
 "
 " reset: Backend specific cleanup, no need to clean global state
+
+func! ve#backend#keys() abort
+  return ['name', 'init', 'search', 'reset']
+endfunc
 
 func! ve#backend#es_init() abort
 
@@ -74,7 +78,7 @@ func! s:ProcessOutput(output, offset, total) abort
 endfunc
 
 func! s:ESUpdate(job, log) abort
-  let g:ve_backend.cached_query .= a:log
+  let ve#globals#backend().cached_query .= a:log
   return a:log
 endfunc
 
@@ -87,7 +91,7 @@ func! ve#backend#es_search() abort
 
   const l:exec = 'es.exe'
 
-  if (g:ve_py_search_txt != g:ve_backend.cached_query)
+  if (g:ve_py_search_txt != ve#globals#backend().cached_query)
 
     const l:query = printf('%s %s', l:exec, g:ve_py_search_txt)
 
@@ -112,13 +116,13 @@ func! ve#backend#es_search() abort
       "let l:args = { 'focus': 0, 'auto_kill': 1, 'on_log': function('s:ESUpdate'), 'on_pre_exit': function('s:ESExit') }
       "call VJStart('TEST', l:res_query, l:args)
 
-      let g:ve_backend.cached_query = g:ve_py_search_txt
-      let g:ve_backend.cached_results = l:json
+      let ve#globals#backend().cached_query = g:ve_py_search_txt
+      let ve#globals#backend().cached_results = l:json
 
     endif
   endif
 
-  "call s:ProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_list_size)
+  "call s:ProcessOutput(ve#globals#backend().cached_results, g:ve_offset_txt, ve#globals#config_list_size())
 
   return 1
 endfunc
@@ -176,7 +180,7 @@ endfunc
 
 func! ve#backend#fd_search() abort
 
-  if (g:ve_py_search_txt != g:ve_backend.cached_query)
+  if (g:ve_py_search_txt != ve#globals#backend().cached_query)
 
     let l:query = s:FixQuery(g:ve_py_search_txt)
 
@@ -193,11 +197,11 @@ func! ve#backend#fd_search() abort
     let l:res_query = join(l:res_query, ' ')
     let l:raw = split(system(l:res_query, ' '), "\n")
 
-    let g:ve_backend.cached_query   = g:ve_py_search_txt
-    let g:ve_backend.cached_results = s:GenerateFDOutput(l:raw)
+    let ve#globals#backend().cached_query   = g:ve_py_search_txt
+    let ve#globals#backend().cached_results = s:GenerateFDOutput(l:raw)
   endif
 
-  return s:ProcessOutput(g:ve_backend.cached_results, g:ve_offset_txt, g:ve_total_r)
+  return s:ProcessOutput(ve#globals#backend().cached_results, g:ve_offset_txt, g:ve_total_r)
 
 endfunc
 
@@ -226,7 +230,7 @@ func! ve#backend#py_init() abort
 
   const l:wrapper_file = escape(g:ve_root_dir, ' ') . '/python/wrapper.py'
   
-  if (g:ve_use_python3 == 1)
+  if (ve#globals#config_use_python3())
     exe 'py3file ' . l:wrapper_file
   else
     exe 'pyfile ' . l:wrapper_file
@@ -238,7 +242,7 @@ endfunc
 
 func! ve#backend#py_search() abort
 
-  if (g:ve_use_python3 == 1)
+  if (ve#globals#config_use_python3())
     python3 VE_SearchWrapper()
   else
     python VE_SearchWrapper()

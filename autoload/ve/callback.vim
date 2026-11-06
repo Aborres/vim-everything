@@ -5,7 +5,7 @@ func! ve#callback#add_callback(c) abort
     return
   endif
 
-  call add(g:ve_callbacks, a:c)
+  call add(ve#globals#callbacks(), a:c)
 
 endfunc
 
@@ -37,6 +37,10 @@ func! s:FocusBuffer(buffer) abort
   return 0
 endfunc
 
+func! s:Execute(action, path) abort
+  execute a:action . ' ' . a:path 
+endfunc
+
 func! ve#callback#call(id, result) abort
 
   let l:r = a:result[0]
@@ -47,7 +51,7 @@ func! ve#callback#call(id, result) abort
     let l:path = g:ve_results.paths[l:r]
     let l:is_folder = g:ve_results.types[l:r]
 
-    if (g:ve_switch_focus)
+    if (g:ve#globals#config_switch_focus())
 
       let l:full_path = l:is_folder ? l:path : ve#callback#get_file_full_path(l:r)
 
@@ -64,25 +68,25 @@ func! ve#callback#call(id, result) abort
       let l:full_path = ve#callback#get_file_full_path(l:r)
 
       if (l:m == g:ve_open_enter)
-          execute g:ve_edit . l:full_path
+        call s:Execute(g:ve#globals#actions_edit(), l:full_path)
       elseif (l:m == g:ve_open_vs)
-          execute g:ve_vedit . l:full_path 
+        call s:Execute(g:ve#globals#actions_vedit(), l:full_path)
       elseif (l:m == g:ve_open_sp)
-          execute g:ve_hedit . l:full_path
+        call s:Execute(g:ve#globals#actions_hedit(), l:full_path)
       elseif (l:m == g:ve_open_tab)
-          execute g:ve_tedit . l:full_path
+        call s:Execute(g:ve#globals#actions_tedit(), l:full_path)
       else 
         call ve#plugin#log("Undefined mode to open file")
       endif
     else
       if (l:m == g:ve_open_enter)
-          execute g:ve_explore . l:path
+        call s:Execute(g:ve#globals#actions_explore(), l:path)
       elseif (l:m == g:ve_open_vs)
-          execute g:ve_vexplore . l:path
+        call s:Execute(g:ve#globals#actions_vexplore(), l:path)
       elseif (l:m == g:ve_open_sp)
-          execute g:ve_hexplore . l:path
+        call s:Execute(g:ve#globals#actions_hexplore(), l:path)
       elseif (l:m == g:ve_open_tab)
-          execute g:ve_texplore . l:path
+        call s:Execute(g:ve#globals#actions_texplore(), l:path)
       else 
         call ve#plugin#log("Undefined mode to open folder")
       endif

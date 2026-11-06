@@ -44,8 +44,8 @@ def __Delta(max_l, e):
 def __UpdateVimBuffers(names, paths, types, sizes, modds, inc_size, inc_modd, max_buff_size):
   out = []
 
-  enable_jump = vim.vars["ve_enable_number_jump"]
-  valid_ids = vim.eval("g:ve_jump_shortcuts")
+  enable_jump = vim.eval("ve#globals#config_enable_number_jump()")
+  valid_ids = vim.eval("ve#globals#config_jump_shortcuts()")
 
   count = len(names)
 
@@ -99,7 +99,7 @@ def __UpdateVimBuffers(names, paths, types, sizes, modds, inc_size, inc_modd, ma
 
 def __VE_QueryType(text):
 
-  type = vim.vars["ve_file_results"]
+  type = vim.eval("ve#globals#config_file_results()")
 
   filter = text[:2].lower()
 
@@ -119,13 +119,13 @@ def VE_Search(text, f, buff_size, inc_size, inc_modd):
   text = text.replace("/", "\\") #standard any separator so Everything is happy
   text = text.replace("\\\\", "\\")
 
-  use_as = vim.vars["ve_use_alternative_search"]
+  use_as = int(vim.eval("ve#globals#config_use_alternative_search()")) == 1
 
   e = None
-  if (windows and not use_as):
+  if (windows and (use_as == 0)):
     e = Everything()
   else:
-    search_mode = vim.vars["ve_alternative_search_mode"]
+    search_mode = vim.eval("ve#globals#config_use_alternative_search_mode()")
     e = Find()
     e.setMode(search_mode)
 
@@ -149,7 +149,7 @@ def VE_Search(text, f, buff_size, inc_size, inc_modd):
   inc_size = inc_size and not use_as
   inc_modd = inc_modd and not use_as
 
-  max_buff_size = vim.vars["ve_style"]["window"]["fixed_w"]
+  max_buff_size = int(vim.eval("ve#globals#style().window.fixed_w"))
   __UpdateVimBuffers(file_names, file_paths, file_types, file_sizes, file_modds, inc_size, inc_modd, max_buff_size)
 
   return 1

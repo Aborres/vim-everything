@@ -1,9 +1,9 @@
 
 func! ve#filter#list_size() abort
-  if g:ve_enable_number_jump 
-    return min([len(g:ve_jump_shortcuts), g:ve_list_size])
+  if (ve#globals#config_enable_number_jump())
+    return min([len(ve#globals#config_jump_shortcuts()), ve#globals#config_list_size()])
   endif
-  return g:ve_list_size
+  return ve#globals#config_list_size()
 endfunc
 
 func! ve#filter#total_pages() abort
@@ -79,13 +79,18 @@ func! ve#filter#call(id, key) abort
 
   if (g:ve_current_mode == g:ve_input_mode)
     return s:FilterInput_mode(a:id, a:key)
-  elseif (g:ve_current_mode == g:ve_nav_mode)
+  endif
+
+  if (g:ve_current_mode == g:ve_nav_mode)
     return ve#filter#nav_mode(a:id, a:key)
-  else
-    call ve#plugin#log('Undefined filter mode')
+  endif
+
+  if (g:ve_current_mode == g:ve_cache_mode)
+    return ve#cache#filter(a:id, a:key)
   endif
 
   " Shouldn't ever happen
+  call ve#plugin#log('Undefined filter mode')
   return 1
 
 endfunc
@@ -342,43 +347,51 @@ func! s:FilterInput_mode(id, key) abort
       return s:FilterBS(a:id, a:key)
     endif
 
-    if (a:key == g:ve_clear_c)
+    if (a:key == ve#globals#shortcuts_clear())
       let g:ve_search_txt = ve#cursor#clear_text()
       return ve#update#input_text(a:id)
     endif
 
-    if (a:key == g:ve_clear_name)
+    if (a:key == ve#globals#shortcuts_clear_name())
       return s:FilterClearName(a:id, a:key)
     endif
 
-    if (a:key == g:ve_clear_path)
+    if (a:key == ve#globals#shortcuts_clear_path())
       return s:FilterClearPath(a:id, a:key)
     endif
 
-    if (a:key == g:ve_clear_ext)
+    if (a:key == ve#globals#shortcuts_clear_ext())
       return s:FilterExt(a:id, a:key)
     endif
 
-    if (a:key == g:ve_clear_filter)
+    if (a:key == ve#globals#shortcuts_clear_filter())
       return s:FilterFilter(a:id, a:key)
     endif
 
-    if (a:key == g:ve_clear_last_folder)
+    if (a:key == ve#globals#shortcuts_clear_last_folder())
       return s:FilterLastFolder(a:id, a:key)
     endif
-  endif
 
-  if (a:key == "\<Del>")
-    return s:FilterDel(a:id, a:key)
+    if (a:key == "\<Del>")
+      return s:FilterDel(a:id, a:key)
+    endif
   endif
 
   if (a:key == "\<CR>") "Enter
     if (g:ve_num_r)
+
+      call ve#cache#query(g:ve_py_search_txt)
+      call ve#plugin#refresh_style()
+
       let g:ve_current_mode = g:ve_nav_mode
       return ve#jump#to_first_element(a:id)
     else
       return 1
     endif
+  endif
+
+  if (a:key == ve#globals#shortcuts_open_history_window())
+    return s:FromInputToCache(a:id)
   endif
 
   if (a:key == "\<Esc>")
@@ -395,6 +408,26 @@ endfunc
 func! s:FromNavToInput(id, key) abort
   let g:ve_current_mode = g:ve_input_mode
   return ve#jump#to_input(a:id)
+endfunc
+
+func! s:FromInputToCache(id) abort
+
+  if (ve#cache#num_queries())
+
+    let l:text = ve#cache#text()
+    call ve#plugin#set_text(a:id, l:text)
+
+    let g:ve_current_mode = g:ve_cache_mode
+    return ve#jump#to_input(a:id)
+  endif
+
+  return 1
+endfunc
+
+func! ve#filter#from_cache_to_input(id) abort
+  let g:ve_current_mode = g:ve_input_mode
+  call ve#jump#to_input(a:id)
+  return ve#plugin#text_refresh()
 endfunc
 
 func! ve#filter#nav_mode(id, key) abort
@@ -448,46 +481,59 @@ func! ve#filter#nav_mode(id, key) abort
     return ve#update#input_text(a:id)
   endif
 
-  if (a:key == g:ve_clear_c)
-    call s:FromNavToInput(a:id, a:key)
-    let g:ve_search_txt = ve#cursor#clear_text()
-    return ve#update#input_text(a:id)
+  if (len(g:ve_search_txt))
+    if (a:key == ve#globals#shortcuts_clear())
+      call s:FromNavToInput(a:id, a:key)
+      let g:ve_search_txt = ve#cursor#clear_text()
+      return ve#update#input_text(a:id)
+    endif
+
+    if (a:key == ve#globals#shortcuts_clear_name())
+      call s:FromNavToInput(a:id, a:key)
+      return s:FilterClearName(a:id, a:key)
+    endif
+
+    if (a:key == ve#globals#shortcuts_clear_path())
+      call s:FromNavToInput(a:id, a:key)
+      return s:FilterClearPath(a:id, a:key)
+    endif
+
+    if (a:key == ve#globals#shortcuts_clear_ext())
+      call s:FromNavToInput(a:id, a:key)
+      return s:FilterExt(a:id, a:key)
+    endif
+
+    if (a:key == ve#globals#shortcuts_clear_filter())
+      call s:FromNavToInput(a:id, a:key)
+      return s:FilterFilter(a:id, a:key)
+    endif
+
+    if (a:key == ve#globals#shortcuts_clear_last_folder())
+      call s:FromNavToInput(a:id, a:key)
+      return s:FilterLastFolder(a:id, a:key)
+    endif
   endif
 
-  if (a:key == g:ve_clear_name)
-    call s:FromNavToInput(a:id, a:key)
-    return s:FilterClearName(a:id, a:key)
+  if (a:key == ve#globals#shortcuts_open_history_window())
+    return s:FromInputToCache(a:id)
   endif
 
-  if (a:key == g:ve_clear_ext)
-    call s:FromNavToInput(a:id, a:key)
-    return s:FilterExt(a:id, a:key)
-  endif
+  if (ve#globals#config_enable_number_jump())
 
-  if (a:key == g:ve_clear_filter)
-    call s:FromNavToInput(a:id, a:key)
-    return s:FilterFilter(a:id, a:key)
-  endif
+    let l:jump_shortcuts = ve#globals#config_jump_shortcuts()
 
-  if (a:key == g:ve_clear_path)
-    call s:FromNavToInput(a:id, a:key)
-    return s:FilterClearPath(a:id, a:key)
-  endif
-
-  if (g:ve_enable_number_jump)
-
-    let l:num_shortcuts = len(g:ve_jump_shortcuts)
+    let l:num_shortcuts = len(l:jump_shortcuts)
     let l:jump_range = min([g:ve_num_r - 1, l:num_shortcuts - 1]) " Ranges are [] so need to remove one here
 
     for i in range(0, l:jump_range) 
-      if (a:key == g:ve_jump_shortcuts[i])
+      if (a:key == l:jump_shortcuts[i])
         call ve#jump#to_element(a:id, i + g:ve_top_offset)
         return s:FilterCloseWidth(a:id, g:ve_open_enter)
       endif
     endfor
   endif
 
-  for l:c in g:ve_callbacks
+  for l:c in ve#globals#callbacks()
     if ((a:key == l:c[0]) && g:ve_num_r)
       let l:file = s:GetCurrentlyFocusedFile()
       let l:Ptr = l:c[2]

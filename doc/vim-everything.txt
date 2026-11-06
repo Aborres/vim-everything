@@ -17,8 +17,8 @@ directly into vim using popup windows.
 The plugin also supports a fallback to rg for platform that don't support
 Everything, the rg path can be enabled on Windows too, see:
 
-                   |g:ve_use_alternative_search|
-                   |g:ve_alternative_search_mode|
+                   |g:ve.config.use_alternative_search|
+                   |g:ve.config.alternative_search_mode|
 
 However, the default, maintained and recommended path is Everything.
 
@@ -44,290 +44,74 @@ VE_Search(txt)
 Variables ~
 
   Globals:~
-  |g:ve_list_size| 
-  |g:ve_enable_number_jump|
-  |g:ve_jump_shortcuts|
-  |g:ve_switch_focus|
-  |g:ve_keep_prev_search|
-  |g:ve_use_python3|
-  |g:ve_file_results|
+  |g:ve.backend|
+  |g:ve.last_search|
+  |g:ve.callbacks|
 
-  KeyBindings:~
-  |g:ve_clear_c|
-  |g:ve_clear_name|
-  |g:ve_clear_path|
-  |g:ve_clear_ext|
-  |g:ve_clear_filter|
-  |g:ve_clear_last_folder|
+  Config:~
+  |g:ve.config|
+  |g:ve.config.list_size|
+  |g:ve.config.enable_number_jump|
+  |g:ve.config.jump_shortcuts|
+  |g:ve.config.keep_prev_search|
+  |g:ve.config.use_python3|
+  |g:ve.config.file_results|
+  |g:ve.config.results_size|
+  |g:ve.config.results_mod_date|
+  |g:ve.config.use_alternative_search|
+  |g:ve.config.alternative_search_mode|
+  |g:ve.config.switch_focus|
+
+  Actions:~
+  |g:ve.actions|
+  |g:ve.actions.edit|
+  |g:ve.actions.vedit|
+  |g:ve.actions.hedit|
+  |g:ve.actions.tedit|
+  |g:ve.actions.explore|
+  |g:ve.actions.vexplore|
+  |g:ve.actions.hexplore|
+  |g:ve.actions.texplore|
+
+  Shortcuts:~
+  |g:ve.shortcuts|
+  |g:ve.shortcuts.clear|
+  |g:ve.shortcuts.clear_name|
+  |g:ve.shortcuts.clear_path|
+  |g:ve.shortcuts.clear_ext|
+  |g:ve.shortcuts.clear_filter|
+  |g:ve.shortcuts.clear_last_folder|
+  |g:ve.shortcuts.open_history_window|
+
+  History:~
+  |g:ve.history|
+  |g:ve.history.enabled|
+  |g:ve.history.pool_size|
 
   Style:~
-  |g:ve_style|
-
-  Backends:~
-  |g:ve_use_alternative_search|
-  |g:ve_alternative_search_mode|
-
-  Functions:~
-  |g:ve_explore|
-  |g:ve_vexplore|
-  |g:ve_hexplore|
-  |g:ve_texplore|
-  |g:ve_edit|
-  |g:ve_vedit|
-  |g:ve_hedit|
-  |g:ve_tedit|
-
-  Helpers:~
-  |g:ve_last_search|
-  |g:ve_callbacks|
+  |g:ve.style|
+  |g:ve.style.window|
+  |g:ve.style.window.scrollbar|
+  |g:ve.style.cursor|
+  |g:ve.style.footer|
 
 ------------------------------------------------------------------------------
-                                                               *g:ve_list_size*
->
-  let g:ve_list_size = 20 
-<
-
-Changes the minimum number of elements to show in searches
+                                                                 *g:ve.backend*
+TODO: Part under development
 ------------------------------------------------------------------------------
-                                                     *g:ve_enable_number_jump*
+                                                             *g:ve.last_search*
 >
-  let g:ve_enable_number_jump = 1
-<
-
-If enabled limits g:ve_list_size to len(g:ve_jump_shortcuts)
-------------------------------------------------------------------------------
-                                                         *g:ve_jump_shortcuts*
->
-  let g:ve_jump_shortcuts = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-                             'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
-<
-Shortcut keys to use for quick open from the list of items
-------------------------------------------------------------------------------
-                                                           *g:ve_switch_focus*
->
-  let g:ve_switch_focus = 1
-<
-Whether to switch to a buffer if the search file is already opened
-------------------------------------------------------------------------------
-                                                       *g:ve_keep_prev_search*
->
-  let g:ve_keep_prev_search = 1 
-<
-
-Forces VE to keep the input text in between searchs
-------------------------------------------------------------------------------
-                                                            *g:ve_use_python3*
->
-  let g:ve_use_python3 = 1 
-<
-
-Set g:ve_use_python3 = 0 to use python27
-------------------------------------------------------------------------------
-                                                           *g:ve_file_results*
->
-  let g:ve_file_results = 1
-<
-0: All, 1: Files, 2: Folders
-Can be overwritten using (a)all:, (f)iles:, (d)irectories: in the input field
-This option is case insensitive
-
-Default filters from Everything are also allowed: 
-https://www.voidtools.com/support/everything/searching/
-
-This setting doesn't work with the rg fallback
-
-For Example: 
->
-  f:texture.cpp \my_engine\
-<
-------------------------------------------------------------------------------
-                                                                *g:ve_clear_c*
->
-  let g:ve_clear_c = '$'
-<
-
-Key used to clear input search
-------------------------------------------------------------------------------
-                                                             *g:ve_clear_name*
->
-  let g:ve_clear_name = '!'
-<
-
-Key used to clear name from the input search
-------------------------------------------------------------------------------
-                                                             *g:ve_clear_path*
->
-  let g:ve_clear_path = '@'
-<
-
-Key used to clear path from the input search
-------------------------------------------------------------------------------
-                                                              *g:ve_clear_ext*
->
-  let g:ve_clear_ext = '#'
-<
-
-Key used to clear ext from the input search
-------------------------------------------------------------------------------
-                                                           *g:ve_clear_filter*
->
-  let g:ve_clear_filter = '%'
-<
-
-Key used to clear filter from the input search, See: g:ve_file_results
-------------------------------------------------------------------------------
-                                                      *g:ve_clear_last_folder*
->
-  let g:ve_clear_last_folder = ';' 
-<
-Key used to clear last folder from the path in the input search
-------------------------------------------------------------------------------
-                                                                 *g:ve_style*
->
-let g:ve_style = #{
-      \ window: #{
-        \ style: '',
-        \ fixed_w: 128,
-        \ fixed_h: 1,
-        \ resize: 1, 
-        \ opacity: 100,
-        \ wrap: 0,
-        \ bg_image: [],
-        \ scrollbar: #{
-          \ enabled: 0,
-          \ style: '',
-          \ thumb_style: '',
-        \},
-        \ border: #{
-          \ icons: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-          \ style: [],
-        \},
-        \ },
-      \ cursor: #{
-        \ blink: 500, 
-        \ icon: '|', 
-      \ },
-      \ footer: #{
-        \ style: 0
-      \ },
-    \ }
-<
-Structure holding styling for plugin, once the results window
-is opened for the first time the structure is ignored; however, style can be
-refreshed by calling:
->
-  ve#plugin#refresh_style()
-<
-Window Options:
-        style: ''    -> Custom styling 
-        fixed_w: 128 -> if anything but 0 makes the results window fixed width
-        fixed_h: 1   -> Boolean, Enables/Disables window size 
-                        to follow ve_list_size rules or resize base on results
-        resize: 1    -> Boolean, Whether the window can be resized
-        opacity: 90  -> Results window opacity
-        wrap: 0      -> Enables/disables text wrapping
-        bg_image: [] -> Array of pixels to use as custom bg for the window
-
-Scrollbar Options:
-        enabled: 0      -> Boolean, Hides/shows scrollbar
-        style: ''       -> Custom styling
-        thumb_style: '' -> Custom styling for scrollbar thumb
-
-Border Options:
-        icons: ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
-        style: []
-
-See *popup_setoptions* for further assistance with these settings
-
-Cursor Options:
-        blink: 500 -> Blinking speed in ms, 0 disables blinking
-        icon: '|'  -> Cursor icon
-
-Footer Options
-  style: 0 -> 0: All, 1: Simplified, 2: Stats only
-------------------------------------------------------------------------------
-                                                 *g:ve_use_alternative_search*
->
-  let g:ve_use_alternative_search = 0 
-<
-
-If enabled will use ripgrep, this is the default for all platforms that
-don't support Everything. 
-------------------------------------------------------------------------------
-                                                *g:ve_alternative_search_mode*
->
-  let g:ve_alternative_search_mode = 0 "0: fd, 1: rg
-<
-0: fd, 1: rg
-------------------------------------------------------------------------------
-                                                                *g:ve_explore*
->
-  let g:ve_explore  = 'Explore '  
-<
-
-Default action when pressing Enter on a folder
-------------------------------------------------------------------------------
-                                                               *g:ve_vexplore*
->
-  let g:ve_vexplore = 'Vexplore ' 
-<
-
-Default action when pressing V on a folder
-------------------------------------------------------------------------------
-                                                               *g:ve_hexplore*
->
-  let g:ve_hexplore = 'Hexplore ' 
-<
-
-Default action when pressing S on a folder
-------------------------------------------------------------------------------
-                                                               *g:ve_texplore*
->
-  let g:ve_texplore = 'Texplore ' 
-<
-
-Default action when pressing T on a folder
-------------------------------------------------------------------------------
-                                                                   *g:ve_edit*
->
-  let g:ve_edit  = 'edit '   
-<
-
-Default action when pressing Enter on a file
-------------------------------------------------------------------------------
-                                                                  *g:ve_vedit*
->
-  let g:ve_vedit = 'vsplit ' 
-<
-
-Default action when pressing V on a file
-------------------------------------------------------------------------------
-                                                                  *g:ve_hedit*
->
-  let g:ve_hedit = 'split '  
-<
-
-Default action when pressing S on a file
-------------------------------------------------------------------------------
-                                                                  *g:ve_tedit*
->
-  let g:ve_tedit = 'tabe '   
-<
-
-Default action when pressing T on a file
-------------------------------------------------------------------------------
-                                                            *g:ve_last_search*
->
-  let g:ve_last_search = ""
+  let g:ve.last_search = ""
 < 
-Can't be modified, will contain the string of the last search
+Can't be modified, will contain the string with the last search performed
 ------------------------------------------------------------------------------
-                                                              *g:ve_callbacks*
+                                                               *g:ve.callbacks*
 >
-  let g:ve_callbacks = []
+  let g:ve.callbacks = []
 < 
 List of callbacks to inject extra functionality to vim-everything
 These callbacks are only called when navigating throught the list of results
+
 Each callback must be a list containing three elements:
             ['binding', 'name', function('callback')]
   Where:
@@ -335,16 +119,288 @@ Each callback must be a list containing three elements:
     'name': name of the callback to display in the footer
     'callback': callback to trigger on binding
 
-Signature: 
-            func! callback(id, file)
-            endfunc
+  Signature: 
+    func! callback(id, file)
+    endfunc
 
-    Where:
-      'id': vim-everything's popup window
-      'file': highlighted file in the moment of the keybinding
+  Where:
+    'id': vim-everything's popup window
+    'file': highlighted file in the moment of the keybinding
+
+Using ve#callback#add_callback(callback) is recommended
 ------------------------------------------------------------------------------
-hi PopupSelected guifg=#000000 guibg=#ffa500
+                                                                  *g:ve.config*
+>
+let g:ve.config = #{
+  \ list_size: 20,
+  \ enable_number_jump: 1,
+  \ jump_shortcuts: [ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+                    \ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p' ],
+  \ keep_prev_search: 1,
+  \ use_python3: 1,
+  \ file_results: 1,
+  \ results_size: 1,
+  \ results_mod_date: 1,
+  \ use_alternative_search: 0,
+  \ alternative_search_mode: 0,
+  \ switch_focus: 1,
+\}
+<
 
-Use PopupNotification to change BG color
-Use PopupSelected to change cursor color
+Global VE Config Variables
+                                                        *g:ve.config.list_size*
+  list_size : 20 -> Changes the minimum number of elements to show in searches 
+
+                                               *g:ve.config.enable_number_jump*
+  enable_number_jump: 1 -> If enabled limits g:ve.config.list_size
+                           to len(g:ve_jump_shortcuts)
+
+                                                   *g:ve.config.jump_shortcuts*
+  jump_shortcuts: []    -> Shortcut keys to use for quick open
+                           from the list of items
+                           Default value:
+>
+                            ['1', '2', '3', '4', '5',
+                           \ '6', '7', '8', '9', '0',
+                           \ 'q', 'w', 'e', 'r', 't',
+                           \ 'y', 'u', 'i', 'o', 'p']
+<
+
+                                                 *g:ve.config.keep_prev_search*
+  keep_prev_search: 1 -> Forces VE to keep the input text in between searchs
+
+                                                      *g:ve.config.use_python3*
+  use_python3: 1 -> Set to 0 to use python27
+
+                                                     *g:ve.config.file_results*
+  file_results: 1 -> 0: All, 1: Files, 2: Folders
+                     Can be overwritten using these prefixes:
+                       (a)all:
+                       (f)iles:
+                       (d)irectories: 
+
+                     This option is case insensitive
+
+                     Default filters from Everything are also allowed: 
+                     www.voidtools.com/support/everything/searching/
+
+                     This setting doesn't work with the rg fallback
+
+                     For Example: 
+>
+                       f:texture.cpp \my_engine\
+<
+                                                     *g:ve.config.results_size*
+  results_size: 1 -> Show file size in results window
+
+                                                 *g:ve.config.results_mod_date*
+  resulsts_mod_date: 1 -> Show last modification date in results window
+
+                                           *g:ve.config.use_alternative_search*
+  use_alternative_search: 0  -> If enabled will use ripgrep,
+                                this is the default for all platforms
+                                that don't support Everything. 
+
+                                          *g:ve.config.alternative_search_mode*
+  alternative_search_mode: 0 -> 0: fd, 1: rg
+
+                                                     *g:ve.config.switch_focus*
+  switch_focus: 1 -> Switch to a buffer if the search file is already opened
+------------------------------------------------------------------------------
+                                                                 *g:ve.actions*
+>
+  let g:ve.actions = #{
+    \ edit:   'edit',
+    \ vedit:  'vsplit',
+    \ hedit:  'split',
+    \ tedit:  'tabe',
+    \ explore:  'Explore',
+    \ vexplore: 'Vexplore',
+    \ hexplore: 'Hexplore',
+    \ texplore: 'Texplore',
+  \ }
+<
+List of actions and commands to execute when opening files and folders
+
+Files:
+                                                            *g:ve.actions.edit*
+  edit: 'edit'    -> Default action when pressing Enter on a file
+
+                                                           *g:ve.actions.vedit*
+  vedit: 'vsplit' -> Default action when pressing V on a file
+
+                                                           *g:ve.actions.hedit*
+  hedit: 'split'  -> Default action when pressing S on a file
+
+                                                           *g:ve.actions.tedit*
+  tedit: 'tabe'   -> Default action when pressing T on a file
+
+Folders:
+                                                         *g:ve.actions.explore*
+  explore: 'Explore'   -> Default action when pressing Enter on a folder
+
+                                                        *g:ve.actions.vexplore*
+  vexplore: 'Vexplore' -> Default action when pressing V on a folder
+
+                                                        *g:ve.actions.hexplore*
+  hexplore: 'Hexplore' -> Default action when pressing S on a folder
+
+                                                        *g:ve.actions.texplore*
+  texplore: 'Texplore' -> Default action when pressing T on a folder
+------------------------------------------------------------------------------
+                                                               *g:ve.shortcuts*
+>
+  let g:ve.shortcuts = #{
+    \ clear:               '`',
+    \ clear_name:          '!',
+    \ clear_path:          '@',
+    \ clear_ext:           '#',
+    \ clear_filter:        '%',
+    \ clear_last_folder:   ';',
+    \ open_history_window: '?',
+  \ }
+<
+List of shorcuts when editing the searches
+                                                         *g:ve.shortcuts.clear*
+  clear: '`' -> Key to clear input search
+
+                                                    *g:ve.shortcuts.clear_name*
+  clear_name: '!' -> Key to clear name from the input search
+
+                                                    *g:ve.shortcuts.clear_path*
+  clear_path: '@' -> Key to clear path from the input search
+
+                                                     *g:ve.shortcuts.clear_ext*
+  clear_ext : '#' -> Key to clear ext from the input search
+
+                                                  *g:ve.shortcuts.clear_filter*
+  clear_filter: '%' -> Key to clear filter from the input search,
+                       See: g:ve.config.file_results
+
+                                             *g:ve.shortcuts.clear_last_folder*
+  clear_last_folder: ';' -> Key to clear last folder from the path
+                            in the input search
+
+                                           *g:ve.shortcuts.open_history_window*
+  open_history: '?' -> If history is enabled switch context to history window
+------------------------------------------------------------------------------
+                                                                  *g:ve.history*
+>
+  let g:ve.history = # {
+    \ enabled: 1,
+    \ pool_size: 10,
+  \ }
+<
+vim-everything may cache search texts for quick retrieval
+
+Config:
+                                                         *g:ve.history.enabled*
+  enabled: 1 -> Caches queries for later quicker retrieval,
+                this does not keep the results
+                but the queries themselves
+
+                                                        *g:ve.history.pool_size*
+  pool_size: 10 -> How many queries to cachy at any given time, max of 10
+------------------------------------------------------------------------------
+                                                                   *g:ve.style*
+>
+  let g:ve.style = #{
+        \ window: #{
+          \ style: '',
+          \ selection: 'VESelected',
+          \ fixed_w: 128,
+          \ fixed_h: 1,
+          \ resize: 1, 
+          \ opacity: 100,
+          \ wrap: 0,
+          \ bg_image: [],
+          \ scrollbar: #{
+            \ enabled: 0,
+            \ style: '',
+            \ thumb_style: '',
+          \ },
+          \ border: #{
+            \ icons: ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+            \ style: [],
+          \ },
+        \ },
+        \ cursor: #{
+          \ blink: 500, 
+          \ icon: '|', 
+        \ },
+        \ footer: #{
+          \ style: 0
+        \ },
+      \ }
+<
+Structure holding styling for plugin, once the results window
+is opened for the first time the structure is ignored; however, style can be
+refreshed by calling:
+>
+  ve#plugin#refresh_style()
+<
+
+                                                            *g:ve.style.window*
+Window Options:
+                                                      *g:ve.style.window.style*
+  style: ''     -> Custom styling 
+
+                                                  *g:ve.style.window.selection*
+  selection: 'VESelected' -> Custom styling for selection bar
+
+                                                    *g:ve.style.window.fixed_w*
+  fixed_w: 128  -> if anything but 0 makes the results window fixed width
+
+                                                    *g:ve.style.window.fixed_h*
+  fixed_h: 1    -> Boolean, Enables/Disables window size 
+                   to follow ve.config.list_size rules or
+                   resize base on results
+
+                                                     *g:ve.style.window.resize*
+  resize: 1     -> Boolean, Whether the window can be resized
+
+                                                    *g:ve.style.window.opacity*
+  opacity: 100  -> Results window opacity
+
+                                                       *g:ve.style.window.wrap*
+  wrap: 0       -> Enables/disables text wrapping
+
+                                                   *g:ve.style.window.bg_image*
+  bg_image: []  -> Array of pixels to use as custom bg for the window
+
+                                                  *g:ve.style.window.scrollbar*
+Scrollbar Options:
+                                          *g:ve.style.window.scrollbar.enabled*
+  enabled: 0      -> Boolean, Hides/shows scrollbar
+
+                                            *g:ve.style.window.scrollbar.style*
+  style: ''       -> Custom styling
+
+                                      *g:ve.style.window.scrollbar.thumb_style*
+  thumb_style: '' -> Custom styling for scrollbar thumb
+
+                                                     *g:ve.style.window.border*
+Border Options:
+                                               *g:ve.style.window.border.icons*
+  icons: ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+
+                                               *g:ve.style.window.border.style*
+  style: []
+
+See |popup_setoptions| for further assistance with these settings
+
+                                                            *g:ve.style.cursor*
+Cursor Options:
+                                                      *g:ve.style.cursor.blink*
+  blink: 500 -> Blinking speed in ms, 0 disables blinking
+
+                                                       *g:ve.style.cursor.icon*
+  icon: '|'  -> Cursor icon
+
+                                                            *g:ve.style.footer*
+Footer Options
+                                                      *g:ve.style.footer.style*
+  style: 0 -> 0: All, 1: Simplified, 2: Stats only
 ===============================================================================
+
+vim:tw=78:ts=8:ft=help:norl:
